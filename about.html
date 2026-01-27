@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Veltrix | Pioneering ISP Excellence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #e2e8f0; }
+        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .gradient-text { background: linear-gradient(135deg, #3b82f6 0%, #2dd4bf 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-card { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s ease; }
+        .stat-card:hover { border-color: #3b82f6; transform: translateY(-5px); }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-500/30">
+
+    <nav class="fixed w-full z-50 glass-card py-4">
+        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 group">
+                <i class="fas fa-arrow-left text-blue-500 group-hover:-translate-x-1 transition-transform"></i>
+                <span class="text-xl font-extrabold tracking-tighter text-white uppercase">Veltrix</span>
+            </a>
+            <div class="flex items-center gap-6">
+                <a href="index.html#pricing" class="hidden md:block text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition">Pricing</a>
+                <a href="index.html#get-started" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20">Join Us</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="pt-40 pb-20 px-6 relative overflow-hidden">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-blue-600/10 blur-[120px] rounded-full -z-10"></div>
+        <div class="max-w-5xl mx-auto text-center">
+            <div class="inline-flex items-center px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-[0.2em] mb-8">
+                📡 Engineered for Kenyan Networks
+            </div>
+            <h1 class="text-5xl md:text-7xl font-extrabold text-white tracking-tighter mb-8 leading-none">
+                Automating <span class="gradient-text">ISP Revenue</span> <br>With Precision.
+            </h1>
+            <p class="text-slate-400 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed italic">
+                Veltrix is a specialized billing bridge designed to sync M-Pesa STK transactions directly to MikroTik Hotspot and PPPoE users. We eliminate the manual hustle, allowing you to focus on expanding your fiber and wireless reach.
+            </p>
+        </div>
+    </header>
+
+    <section class="py-12 px-6">
+        <div class="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+            <div class="stat-card p-8 rounded-3xl text-center">
+                <h4 class="text-4xl font-black text-blue-500 mb-1">STK</h4>
+                <p class="text-[10px] uppercase font-black tracking-widest text-slate-500">Auto-Push Enabled</p>
+            </div>
+            <div class="stat-card p-8 rounded-3xl text-center">
+                <h4 class="text-4xl font-black text-teal-400 mb-1">0%</h4>
+                <p class="text-[10px] uppercase font-black tracking-widest text-slate-500">Revenue Leakage</p>
+            </div>
+            <div class="stat-card p-8 rounded-3xl text-center">
+                <h4 class="text-4xl font-black text-white mb-1">Live</h4>
+                <p class="text-[10px] uppercase font-black tracking-widest text-slate-500">Voucher Delivery</p>
+            </div>
+            <div class="stat-card p-8 rounded-3xl text-center">
+                <h4 class="text-4xl font-black text-blue-400 mb-1">Cloud</h4>
+                <p class="text-[10px] uppercase font-black tracking-widest text-slate-500">Terminal Sync</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-24 px-6 bg-slate-950/40">
+        <div class="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-16">
+            <div class="lg:w-1/2">
+                <h2 class="text-blue-500 text-xs font-black uppercase tracking-[0.3em] mb-6">The Mission</h2>
+                <h3 class="text-3xl md:text-5xl font-extrabold text-white tracking-tighter mb-8">Empowering Local ISPs with World-Class Automation</h3>
+                <p class="text-slate-400 mb-8 leading-relaxed">
+                    Veltrix was built to solve the "Payment Gap." Our mission is to provide independent network owners in Kenya with tools that automatically verify M-Pesa payments and instantly update router configurations without human intervention.
+                </p>
+                <ul class="space-y-4 text-sm font-bold text-slate-300">
+                    <li class="flex items-center gap-3"><i class="fas fa-check-circle text-blue-500"></i> Direct PayHero & M-Pesa API integrations</li>
+                    <li class="flex items-center gap-3"><i class="fas fa-check-circle text-blue-500"></i> Seamless MikroTik User Manager automation</li>
+                    <li class="flex items-center gap-3"><i class="fas fa-check-circle text-blue-500"></i> Optimized for both Fiber (PPPoE) and WiFi Hotspots</li>
+                </ul>
+            </div>
+            <div class="lg:w-1/2">
+                <div class="relative p-4 glass-card rounded-[3rem]">
+                    <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc51?auto=format&fit=crop&q=80&w=800" class="rounded-[2.5rem] grayscale hover:grayscale-0 transition-all duration-500" alt="Server infrastructure">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-24 px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-blue-500 text-xs font-black uppercase tracking-[0.3em] mb-4">Core Principles</h2>
+                <h3 class="text-3xl md:text-5xl font-extrabold text-white tracking-tighter">Why ISPs Trust Veltrix</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="p-10 rounded-[2rem] bg-white/5 border border-white/5 hover:bg-blue-600/10 hover:border-blue-500/30 transition-all">
+                    <i class="fas fa-bolt text-blue-500 text-3xl mb-6"></i>
+                    <h4 class="text-white font-extrabold text-xl mb-4">Instant Access</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed">Vouchers are delivered via SMS or on-screen immediately after a successful STK PIN entry.</p>
+                </div>
+                <div class="p-10 rounded-[2rem] bg-white/5 border border-white/5 hover:bg-blue-600/10 hover:border-blue-500/30 transition-all">
+                    <i class="fas fa-lock text-teal-400 text-3xl mb-6"></i>
+                    <h4 class="text-white font-extrabold text-xl mb-4">MAC Binding</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed">Our system locks sessions to specific devices, preventing unauthorized credential sharing among neighbors.</p>
+                </div>
+                <div class="p-10 rounded-[2rem] bg-white/5 border border-white/5 hover:bg-blue-600/10 hover:border-blue-500/30 transition-all">
+                    <i class="fas fa-cloud text-blue-400 text-3xl mb-6"></i>
+                    <h4 class="text-white font-extrabold text-xl mb-4">Cloud Logic</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed">The engine runs on high-availability cloud servers, ensuring your billing never goes down even if your power does.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-24 px-6 bg-blue-600">
+        <div class="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-16">
+            <div class="lg:w-1/2 order-2 lg:order-1">
+                <div class="relative p-4 bg-white/10 rounded-[3rem] border border-white/20">
+                    <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&q=80&w=800" class="rounded-[2.5rem] shadow-2xl" alt="Technical Excellence">
+                </div>
+            </div>
+            <div class="lg:w-1/2 order-1 lg:order-2">
+                <h2 class="text-white/80 text-xs font-black uppercase tracking-[0.3em] mb-4 italic">The Architecture</h2>
+                <h3 class="text-3xl md:text-5xl font-extrabold text-white tracking-tighter mb-8">Built by Network Specialists</h3>
+                <p class="text-white/80 mb-10 leading-relaxed">
+                    Veltrix isn't built by generalists. It is designed by engineers who understand the MikroTik terminal, API port security, and the intricacies of M-Pesa C2B/STK Push flows.
+                </p>
+                <div class="space-y-6">
+                    <div class="flex items-center gap-4 bg-white/10 p-5 rounded-2xl border border-white/10">
+                        <div class="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center"><i class="fas fa-code text-xs"></i></div>
+                        <div><p class="text-white font-bold text-sm">Lightweight Backend</p><p class="text-white/60 text-xs">Optimized Google Apps Script for rapid execution.</p></div>
+                    </div>
+                    <div class="flex items-center gap-4 bg-white/10 p-5 rounded-2xl border border-white/10">
+                        <div class="w-10 h-10 rounded-full bg-blue-400/20 text-blue-300 flex items-center justify-center"><i class="fas fa-terminal text-xs"></i></div>
+                        <div><p class="text-white font-bold text-sm">Automated Scripts</p><p class="text-white/60 text-xs">One-click script generation for your MikroTik routers.</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-24 px-6 text-center">
+        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-6">Lead Architect of Veltrix Engine</p>
+        <div class="inline-flex items-center gap-6 p-6 glass-card rounded-[2.5rem] border-blue-500/20">
+            <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center font-black text-2xl text-white shadow-xl shadow-blue-500/20">B</div>
+            <div class="text-left">
+                <h4 class="text-white font-black text-xl leading-none mb-1">Brighton the Dev</h4>
+                <p class="text-blue-400 text-xs uppercase font-black tracking-widest">Full-Stack ISP Solutions</p>
+                <div class="flex gap-3 mt-3">
+                    <a href="https://mrsnookum.github.io/Brighton-Portfolio/" class="text-slate-500 hover:text-white transition"><i class="fab fa-github"></i></a>
+                    <a href="#" class="text-slate-500 hover:text-white transition"><i class="fab fa-linkedin"></i></a>
+                    <a href="#" class="text-slate-500 hover:text-white transition"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-12 border-t border-white/5 text-center px-6">
+        <p class="text-slate-600 text-[9px] font-bold uppercase tracking-widest">&copy; 2026 VELTRIX ENGINE | Kisumu, Kenya</p>
+    </footer>
+
+</body>
+</html>
