@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veltrix | Partner Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        @media (max-width: 768px) { .sidebar-hidden { transform: translateX(-100%); } }
+        .chart-cage { position: relative; height: 280px; width: 100%; }
+        .glass-sidebar { background: #0f172a; border-right: 1px solid rgba(255,255,255,0.05); }
+        .nav-btn.active { background: #3b82f6 !important; color: white !important; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3); }
+        .status-active { background-color: #dcfce7; color: #166534; } 
+        .status-expired { background-color: #fee2e2; color: #991b1b; } 
+        .guide-step { border-left: 4px solid #3b82f6; padding-left: 1.5rem; margin-bottom: 2rem; position: relative; }
+        .guide-step::before { content: ''; position: absolute; left: -10px; top: 0; width: 16px; height: 16px; background: #3b82f6; border-radius: 50%; }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-900 overflow-x-hidden">
+
+    <div id="loginOverlay" class="fixed inset-0 bg-slate-950 z-[200] flex items-center justify-center p-4">
+        <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center">
+            <div class="w-16 h-16 bg-blue-600 rounded-2xl mx-auto mb-6 flex items-center justify-center text-white shadow-xl">
+                <i class="fas fa-bolt text-2xl"></i>
+            </div>
+            <h1 class="text-2xl font-black text-slate-900 mb-2">PARTNER LOGIN</h1>
+            <p class="text-slate-500 mb-8 text-sm">Enter the Access Key sent to your email</p>
+            <input type="text" id="partnerKeyInput" placeholder="VLT-XXXX-XXXX" 
+                   class="w-full p-4 border border-slate-200 rounded-2xl mb-4 text-center font-mono tracking-widest outline-none focus:ring-4 focus:ring-blue-500/20">
+            <button onclick="handleLogin()" id="loginBtn" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20">Access Dashboard</button>
+            <p id="loginError" class="text-red-500 mt-4 text-xs font-bold hidden"></p>
+        </div>
+    </div>
+
+    <div class="md:hidden bg-[#0f172a] text-white p-4 flex justify-between items-center fixed top-0 w-full z-[100]">
+        <h1 class="font-black tracking-tight">VELTRIX ADMIN</h1>
+        <button onclick="toggleSidebar()"><i class="fas fa-bars text-xl"></i></button>
+    </div>
+
+    <div id="mainDashboard" class="flex min-h-screen opacity-0 transition-all duration-500 pointer-events-none pt-14 md:pt-0">
+        
+        <div id="sidebar" class="fixed md:relative z-[110] w-72 glass-sidebar text-slate-400 p-8 flex flex-col min-h-screen transition-transform duration-300 sidebar-hidden md:transform-none">
+            <div class="flex items-center gap-3 mb-12">
+                <div class="p-2 bg-blue-600 rounded-lg text-white"><i class="fas fa-bolt text-xs"></i></div>
+                <h1 id="brandName" class="text-white text-xl font-black tracking-tighter uppercase">VELTRIX</h1>
+            </div>
+
+            <nav class="space-y-2 flex-1">
+                <button id="btn-dashboard" onclick="switchTab('dashboard', this)" class="nav-btn active w-full flex items-center gap-4 p-4 rounded-2xl transition-all font-bold text-sm text-left">
+                    <i class="fas fa-chart-pie"></i> Overview
+                </button>
+                <button id="btn-packages" onclick="switchTab('packages', this)" class="nav-btn w-full flex items-center gap-4 p-4 rounded-2xl transition-all font-bold text-sm text-left">
+                    <i class="fas fa-box-open"></i> Packages
+                </button>
+                <button id="btn-transactions" onclick="switchTab('transactions', this)" class="nav-btn w-full flex items-center gap-4 p-4 rounded-2xl transition-all font-bold text-sm text-left">
+                    <i class="fas fa-history"></i> History
+                </button>
+                <button id="btn-billing" onclick="switchTab('billing', this)" class="nav-btn w-full flex items-center gap-4 p-4 rounded-2xl transition-all font-bold text-sm text-left">
+                    <i class="fas fa-file-invoice-dollar"></i> Platform Billing
+                </button>
+                <button id="btn-mikrotik" onclick="switchTab('mikrotik', this)" class="nav-btn w-full flex items-center gap-4 p-4 rounded-2xl transition-all font-bold text-sm text-left">
+                    <i class="fas fa-server"></i> MikroTik Setup
+                </button>
+                <button id="btn-guide" onclick="switchTab('guide', this)" class="nav-btn w-full flex items-center gap-4 p-4 rounded-2xl transition-all font-bold text-sm text-blue-400 text-left">
+                    <i class="fas fa-book-open"></i> Setup Guide
+                </button>
+            </nav>
+
+            <div class="mt-auto pt-8 border-t border-white/5">
+                <button onclick="showManualModal()" class="w-full mb-4 bg-emerald-500/10 text-emerald-500 p-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all text-left">
+                    <i class="fas fa-plus-circle mr-2"></i> Manual Voucher
+                </button>
+                <button onclick="location.reload()" class="w-full text-slate-500 hover:text-white p-2 text-xs font-bold uppercase tracking-widest">Logout</button>
+            </div>
+        </div>
+
+        <div class="flex-1 p-6 md:p-10 overflow-y-auto">
+            
+            <div id="dashboardTab" class="tab-content active">
+                <div class="flex justify-between items-end mb-10">
+                    <div>
+                        <h2 class="text-3xl font-black text-slate-900 tracking-tight">Performance Hub</h2>
+                        <p class="text-slate-500 text-sm">Stats for <span id="ispDisplayName" class="font-bold text-blue-600">...</span></p>
+                    </div>
+                    <div class="bg-blue-600/10 px-4 py-2 rounded-xl text-blue-600 text-xs font-bold uppercase">Live</div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+                    <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Total Revenue</p>
+                        <h3 id="totalSales" class="text-2xl font-black text-slate-900">KES 0</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-[2rem] shadow-sm border-l-4 border-emerald-500">
+                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Income Today</p>
+                        <h3 id="incomeToday" class="text-2xl font-black text-emerald-600">KES 0</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Active Users</p>
+                        <h3 id="activeUsers" class="text-2xl font-black text-slate-900">0</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hidden md:block">
+                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Status</p>
+                        <h3 class="text-xs font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2"><span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> Online</h3>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                    <div class="lg:col-span-2 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+                        <h4 class="text-xs font-black text-slate-400 uppercase mb-8 tracking-widest">Growth</h4>
+                        <div class="chart-cage"><canvas id="pkgChart"></canvas></div>
+                    </div>
+                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+                        <h4 class="text-xs font-black text-slate-400 uppercase mb-8 tracking-widest">Recent Activity</h4>
+                        <div id="activityFeed" class="space-y-4"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="p-6 border-b flex justify-between items-center">
+                        <h4 class="font-black text-slate-900 text-sm uppercase">Users</h4>
+                        <input type="text" onkeyup="filterTable('adminTableBody')" placeholder="Search..." class="p-3 border rounded-xl text-xs outline-none focus:ring-4 focus:ring-blue-500/10 w-48">
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[600px]">
+                            <thead class="bg-slate-50 border-b text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                                <tr>
+                                    <th class="p-6">Client</th><th class="p-6">Plan</th><th class="p-6 text-center">Voucher</th><th class="p-6">Status</th><th class="p-6 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="packagesTab" class="tab-content">
+                <div class="flex justify-between items-center mb-10">
+                    <h2 class="text-3xl font-black text-slate-900 tracking-tight">Plans</h2>
+                    <button onclick="showPackageModal()" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg">New Plan</button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="packageGrid"></div>
+            </div>
+
+            <div id="transactionsTab" class="tab-content">
+                <h2 class="text-3xl font-black text-slate-900 mb-10 tracking-tight">History</h2>
+                <div class="bg-white rounded-[2.5rem] shadow-sm border overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 border-b text-[10px] uppercase text-slate-500 font-black">
+                            <tr><th class="p-6">Date</th><th class="p-6">Phone</th><th class="p-6">Plan</th><th class="p-6">Amount</th><th class="p-6">Code</th></tr>
+                        </thead>
+                        <tbody id="fullHistoryBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="billingTab" class="tab-content">
+                <h2 class="text-3xl font-black text-slate-900 mb-10 tracking-tight">Platform Billing</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                    <div class="bg-slate-900 text-white p-10 rounded-[2.5rem] shadow-xl relative overflow-hidden">
+                        <div class="relative z-10">
+                            <p class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Total Commission Owed</p>
+                            <h3 id="owedAmount" class="text-5xl font-black mb-6">KES 0.00</h3>
+                            <div class="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase">
+                                <i class="fas fa-check-circle"></i> System Active
+                            </div>
+                        </div>
+                        <i class="fas fa-bolt absolute -right-10 -bottom-10 text-[12rem] text-white/5 rotate-12"></i>
+                    </div>
+                    <div class="bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                        <h4 class="font-black text-slate-900 text-sm uppercase mb-6">Clear Commission</h4>
+                        <div class="space-y-4">
+                            <div class="relative">
+                                <span class="absolute left-5 top-1/2 -translate-y-1/2 font-black text-slate-300">+254</span>
+                                <input type="tel" id="billingPhone" placeholder="712345678" 
+                                       class="w-full pl-16 pr-6 py-5 border border-slate-100 rounded-2xl font-bold bg-slate-50 outline-none focus:ring-4 focus:ring-blue-500/10">
+                            </div>
+                            <button onclick="payPlatformCommission()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-blue-600/20">
+                                Pay Now via M-Pesa
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="p-6 border-b"><h4 class="font-black text-slate-900 text-xs uppercase tracking-widest">Commission Log (5%)</h4></div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 text-[10px] font-black text-slate-500 uppercase">
+                                <tr><th class="p-6">Date</th><th class="p-6">Customer Sale</th><th class="p-6 text-blue-600">Veltrix Cut</th><th class="p-6 text-right">Status</th></tr>
+                            </thead>
+                            <tbody id="billingTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="mikrotikTab" class="tab-content">
+                <h2 class="text-3xl font-black text-slate-900 mb-10 tracking-tight">MikroTik Connectivity</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100">
+                        <div class="space-y-6">
+                            <div><label class="text-[10px] font-black uppercase text-slate-400">Cloud DNS Name</label><input type="text" id="mt_dns" placeholder="xxxx.mynetname.net" class="w-full p-4 border rounded-2xl mt-2 outline-none focus:ring-2 focus:ring-blue-500"></div>
+                            <div><label class="text-[10px] font-black uppercase text-slate-400">Router DNS (Optional)</label><input type="text" id="mt_local_dns" placeholder="veltrix.wifi" class="w-full p-4 border rounded-2xl mt-2 outline-none focus:ring-2 focus:ring-blue-500"></div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="text-[10px] font-black uppercase text-slate-400">Username</label><input type="text" id="mt_user" value="veltrix_api" class="w-full p-4 border rounded-2xl mt-2"></div>
+                                <div><label class="text-[10px] font-black uppercase text-slate-400">Password</label><input type="password" id="mt_pass" value="veltrix123" class="w-full p-4 border rounded-2xl mt-2"></div>
+                            </div>
+                            <button onclick="saveAndGenerateScript()" class="w-full bg-slate-900 text-white p-5 rounded-2xl font-black text-[10px] uppercase shadow-xl">Generate Full Config</button>
+                        </div>
+                    </div>
+                    <div class="bg-slate-950 p-10 rounded-[2.5rem] font-mono text-[10px] text-emerald-400 relative overflow-hidden group">
+                        <button onclick="copyToClipboard()" class="absolute top-6 right-6 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white px-4 py-2 rounded-xl border border-emerald-500/20 transition-all font-black text-[10px] uppercase tracking-widest flex items-center gap-2">
+                            <i class="fas fa-copy"></i> <span id="copyBtnText">Copy Code</span>
+                        </button>
+                        <pre id="mt_script_output" class="whitespace-pre-wrap leading-relaxed pt-8"># Enter Cloud DNS and click generate...</pre>
+                    </div>
+                </div>
+            </div>
+
+            <div id="guideTab" class="tab-content">
+                <h2 class="text-2xl md:text-3xl font-bold mb-8 text-slate-900">Setup Guide</h2>
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 max-w-4xl">
+                    <div class="guide-step"><h3 class="font-black text-blue-600">Phase 1: First Login</h3><p class="text-sm">Internet In to Port 1. Computer to Port 2. Use WinBox, login: admin.</p></div>
+                    <div class="guide-step"><h3 class="font-black text-blue-600">Phase 2: Internet</h3><p class="text-sm">IP > DHCP Client > Select ether1. Add DNS 8.8.8.8.</p></div>
+                    <div class="guide-step"><h3 class="font-black text-blue-600">Phase 3: Hotspot</h3><p class="text-sm">Bridge ether2 and wlan1. Hotspot Setup on bridge1. DNS: veltrix.wifi.</p></div>
+                    <div class="guide-step"><h3 class="font-black text-blue-600">Phase 4: Linking</h3><p class="text-sm">Enable api (8728). Paste script from MikroTik tab to terminal.</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="pkgModal" class="fixed inset-0 bg-slate-950/80 hidden z-[250] flex items-center justify-center p-4">
+        <div class="bg-white p-10 rounded-[2.5rem] w-full max-w-md">
+            <h2 class="text-2xl font-black mb-6">Create Plan</h2>
+            <div class="space-y-4">
+                <input type="text" id="newPkgName" placeholder="Name" class="w-full p-4 border rounded-2xl">
+                <input type="number" id="newPkgPrice" placeholder="Price KES" class="w-full p-4 border rounded-2xl">
+                <input type="number" id="newPkgDuration" placeholder="Duration (Mins)" class="w-full p-4 border rounded-2xl">
+                <div class="flex gap-3 pt-4"><button onclick="hidePackageModal()" class="flex-1 bg-slate-100 p-4 rounded-2xl font-bold">Cancel</button><button onclick="addPackage()" class="flex-1 bg-blue-600 text-white p-4 rounded-2xl font-bold">Add</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="manualModal" class="fixed inset-0 bg-slate-950/80 hidden z-[250] flex items-center justify-center p-4">
+        <div class="bg-white p-10 rounded-[2.5rem] w-full max-w-md">
+            <h2 class="text-xl font-black mb-8 uppercase">Manual Voucher</h2>
+            <select id="mPkg" class="w-full p-4 border rounded-2xl mb-4 bg-slate-50 font-bold text-sm"></select>
+            <input type="text" id="mPhone" placeholder="Phone Number" class="w-full p-4 border rounded-2xl mb-8 font-bold">
+            <button onclick="generateManual()" class="w-full bg-blue-600 text-white p-5 rounded-2xl font-black text-[10px] uppercase shadow-lg">Generate</button>
+            <button onclick="hideManualModal()" class="w-full mt-2 text-slate-400 text-[10px] font-bold">CLOSE</button>
+        </div>
+    </div>
+
+    <div id="successModal" class="fixed inset-0 bg-slate-950/90 hidden z-[300] flex items-center justify-center p-4 backdrop-blur-md">
+        <div class="bg-white p-10 rounded-[3rem] w-full max-w-sm text-center">
+            <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fas fa-check"></i></div>
+            <h3 class="text-xl font-bold mb-1 uppercase">Ready</h3>
+            <div class="bg-slate-50 p-6 rounded-[2rem] mb-6"><p id="displayCode" class="text-4xl font-black text-blue-600 tracking-widest">------</p></div>
+            <button onclick="document.getElementById('successModal').classList.add('hidden')" class="w-full bg-slate-900 text-white p-4 rounded-2xl font-bold">Done</button>
+        </div>
+    </div>
+
+    <script>
+        const VCC_URL = 'https://script.google.com/macros/s/AKfycbyScqo1yxjjweBuoWYDE5NZzwMigsgn9dK-D4DKAWqNNLiIcQWLyEGW7gzy91ymSb4/exec';
+        let currentPartnerKey = "";
+        let chartInstance = null;
+
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('sidebar-hidden'); }
+
+        async function handleLogin() {
+            const key = document.getElementById('partnerKeyInput').value.trim();
+            const btn = document.getElementById('loginBtn');
+            const error = document.getElementById('loginError');
+            if(!key) return;
+            btn.innerText = "VERIFYING..."; btn.disabled = true; error.classList.add('hidden');
+            try {
+                const response = await fetch(`${VCC_URL}?action=getPartnerDashboard&partnerKey=${key}`);
+                const data = await response.json();
+                if(data.status === "success") {
+                    currentPartnerKey = key;
+                    document.getElementById('loginOverlay').classList.add('hidden');
+                    document.getElementById('mainDashboard').classList.remove('opacity-0', 'pointer-events-none');
+                    updateUI(data);
+                } else { error.innerText = "Invalid Key."; error.classList.remove('hidden'); }
+            } catch (e) { error.innerText = "Connection failure."; error.classList.remove('hidden'); }
+            btn.innerText = "ACCESS DASHBOARD"; btn.disabled = false;
+        }
+
+        function updateUI(data) {
+            document.getElementById('ispDisplayName').innerText = data.ispName;
+            document.getElementById('brandName').innerText = data.ispName;
+            document.getElementById('totalSales').innerText = `KES ${data.totalRevenue.toLocaleString()}`;
+            document.getElementById('incomeToday').innerText = `KES ${data.incomeToday.toLocaleString()}`;
+            document.getElementById('activeUsers').innerText = data.activeCount;
+
+            document.getElementById('adminTableBody').innerHTML = data.recentTransactions.map(t => `
+                <tr class="border-b hover:bg-slate-50 transition">
+                    <td class="p-6 font-bold text-sm">${t.phone}</td><td class="p-6 text-sm">${t.package}</td>
+                    <td class="p-6 text-center font-mono text-blue-600 font-black tracking-widest">${t.code}</td>
+                    <td class="p-6"><span class="px-2 py-1 rounded-full text-[9px] font-black uppercase ${t.status === 'Active' ? 'status-active' : 'status-expired'}">${t.status}</span></td>
+                    <td class="p-6 text-right space-x-2">
+                         <button onclick="adminAction('${t.code}', 'activate')" class="text-green-600"><i class="fas fa-play"></i></button>
+                         <button onclick="adminAction('${t.code}', 'deactivate')" class="text-red-400"><i class="fas fa-stop"></i></button>
+                    </td>
+                </tr>`).join('');
+
+            document.getElementById('fullHistoryBody').innerHTML = data.recentTransactions.map(t => `
+                <tr class="border-b text-xs">
+                    <td class="p-6 text-slate-400">${t.timestamp}</td><td class="p-6 font-bold">${t.phone}</td>
+                    <td class="p-6">${t.package}</td><td class="p-6 text-green-600 font-black">KES ${t.amount}</td>
+                    <td class="p-6 font-mono text-slate-400 uppercase">${t.code}</td>
+                </tr>`).join('');
+
+            document.getElementById('packageGrid').innerHTML = data.packages.map(p => `
+                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col justify-between">
+                    <div><h4 class="text-xl font-black">${p.name}</h4><p class="text-blue-600 font-bold mb-2">KES ${p.price}</p>
+                    <span class="text-[9px] bg-slate-100 px-2 py-1 rounded-lg uppercase font-bold text-slate-500">${p.duration} Mins</span></div>
+                    <button onclick="deletePackage('${p.name}')" class="mt-8 text-red-400 text-[10px] font-black uppercase tracking-widest">Delete Plan</button>
+                </div>`).join('');
+
+            document.getElementById('mPkg').innerHTML = data.packages.map(p => `<option value="${p.name}">${p.name} (KES ${p.price})</option>`).join('');
+
+            document.getElementById('activityFeed').innerHTML = data.recentTransactions.slice(0,5).map(t => `
+                <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl">
+                    <div><p class="text-[10px] font-black uppercase text-slate-400">${t.package}</p><p class="font-bold text-sm text-slate-900">${t.phone}</p></div>
+                    <div class="text-emerald-500 font-black text-sm">+ KES ${t.amount}</div>
+                </div>`).join('');
+
+            // BILLING LOGIC
+            let totalOwed = 0;
+            document.getElementById('billingTableBody').innerHTML = data.recentTransactions.map(t => {
+                const cut = (t.amount * 0.05).toFixed(2);
+                totalOwed += parseFloat(cut);
+                return `<tr class="border-b text-xs"><td class="p-6 text-slate-400">${t.timestamp}</td><td class="p-6 font-bold">KES ${t.amount}</td><td class="p-6 font-black text-blue-600">KES ${cut}</td><td class="p-6 text-right"><span class="px-2 py-1 bg-amber-100 text-amber-700 rounded-md text-[9px] font-black uppercase">Pending</span></td></tr>`;
+            }).join('');
+            document.getElementById('owedAmount').innerText = `KES ${totalOwed.toFixed(2)}`;
+
+            updateChart(data.packageStats || {});
+        }
+
+        async function refreshPartnerData() {
+            try {
+                const res = await fetch(`${VCC_URL}?action=getPartnerDashboard&partnerKey=${currentPartnerKey}`);
+                const data = await res.json();
+                if(data.status === "success") updateUI(data);
+            } catch (e) { console.error("Refresh failed"); }
+        }
+
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId + 'Tab').classList.add('active');
+            if(el) el.classList.add('active');
+            if (window.innerWidth < 768) toggleSidebar();
+        }
+
+        async function addPackage() {
+            const payload = { action: "addPackage", partnerKey: currentPartnerKey, name: document.getElementById('newPkgName').value, price: document.getElementById('newPkgPrice').value, duration: document.getElementById('newPkgDuration').value };
+            try { await fetch(VCC_URL, { method: "POST", body: JSON.stringify(payload) }); hidePackageModal(); refreshPartnerData(); } catch (e) { console.error("Add failed"); }
+        }
+
+        async function deletePackage(name) {
+            if(!confirm(`Delete ${name}?`)) return;
+            try { await fetch(VCC_URL, { method: "POST", body: JSON.stringify({ action: "deletePackage", partnerKey: currentPartnerKey, name: name }) }); refreshPartnerData(); } catch (e) { console.error("Delete failed"); }
+        }
+
+        async function generateManual() {
+            const payload = { action: "generateManualVoucher", partnerKey: currentPartnerKey, package: document.getElementById('mPkg').value, phone: document.getElementById('mPhone').value || "ADMIN" };
+            try {
+                const res = await fetch(VCC_URL, { method: "POST", body: JSON.stringify(payload) });
+                const data = await res.json();
+                if(data.status === "success") { hideManualModal(); document.getElementById('displayCode').innerText = data.code; document.getElementById('successModal').classList.remove('hidden'); refreshPartnerData(); }
+            } catch (e) { console.error("Manual generate failed"); }
+        }
+
+        async function payPlatformCommission() {
+            const phone = document.getElementById('billingPhone').value;
+            const amountStr = document.getElementById('owedAmount').innerText.replace('KES ', '');
+            const amount = parseFloat(amountStr);
+            if(amount <= 0) return;
+            document.getElementById('owedAmount').innerText = "REQUESTING...";
+            await fetch(VCC_URL, { method: "POST", body: JSON.stringify({ action: "payVeltrix", partnerKey: currentPartnerKey, phone: phone, amount: amount }) });
+            setTimeout(refreshPartnerData, 5000);
+        }
+
+        async function adminAction(code, type) {
+            try { await fetch(VCC_URL, { method: "POST", body: JSON.stringify({ action: type, partnerKey: currentPartnerKey, code: code }) }); refreshPartnerData(); } catch (e) { console.error("Action failed"); }
+        }
+
+        function saveAndGenerateScript() {
+            const dns = document.getElementById('mt_dns').value;
+            const localDns = document.getElementById('mt_local_dns').value || "veltrix.wifi";
+            const user = document.getElementById('mt_user').value;
+            const pass = document.getElementById('mt_pass').value;
+            if(!dns) return;
+            document.getElementById('mt_script_output').innerText = `# MIKROTIK AUTO-CONFIG FOR ISP PORTAL\n# Generated for Cloud DNS: ${dns}\n# ==========================================\n\n# 1. CREATE API USER\n/user add name="${user}" group=full password="${pass}" comment="Billing API User"\n\n# 2. ENABLE API & SSL SERVICES\n/ip service set api disabled=no port=8728\n/ip service set api-ssl disabled=no port=8729\n/ip service set www-ssl disabled=no port=443\n/ip cloud set ddns-enabled=yes\n\n# 3. FIREWALL RULES\n/ip firewall filter add chain=input protocol=tcp dst-port=443 action=accept comment="Allow Billing API" place-before=0\n/ip firewall filter add chain=input protocol=tcp dst-port=8728 action=accept comment="Allow MikroTik API" place-before=0\n\n# 4. ANTI-TETHERING RULES\n/ip firewall mangle add chain=postrouting action=change-ttl new-ttl=set:1 passthrough=yes comment="Prevent Sharing"\n\n# 5. WALLED GARDEN\n/ip hotspot walled-garden\nadd dst-host="mrsnookum.github.io" action=allow\nadd dst-host="*.github.io" action=allow\nadd dst-host="veltrix-isp.top" action=allow\nadd dst-host="script.google.com" action=allow\nadd dst-host="*.google.com" action=allow\nadd dst-host="*.googleusercontent.com" action=allow\nadd dst-host="*.gstatic.com" action=allow\nadd dst-host="backend.payhero.co.ke" action=allow\nadd dst-host="*.payhero.co.ke" action=allow\n\n# 6. AUTHENTICATION\n/ip hotspot profile set [find default=yes] login-by=http-pap,mac dns-name="${localDns}"`;
+        }
+
+        function copyToClipboard() {
+            const scriptText = document.getElementById('mt_script_output').innerText;
+            const copyBtnText = document.getElementById('copyBtnText');
+            if (scriptText.includes("Enter Cloud DNS")) { copyBtnText.innerText = "NO SCRIPT!"; setTimeout(() => { copyBtnText.innerText = "Copy Code"; }, 2000); return; }
+            navigator.clipboard.writeText(scriptText).then(() => { copyBtnText.innerText = "COPIED!"; setTimeout(() => { copyBtnText.innerText = "Copy Code"; }, 3000); }).catch(err => { console.error('Failed to copy: ', err); });
+        }
+
+        function updateChart(stats) {
+            const ctx = document.getElementById('pkgChart').getContext('2d');
+            if(chartInstance) chartInstance.destroy();
+            const labels = Object.keys(stats).length ? Object.keys(stats) : ["No Sales"];
+            const data = Object.values(stats).length ? Object.values(stats) : [0];
+            chartInstance = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ data: data, backgroundColor: '#3b82f6', borderRadius: 12 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } } } });
+        }
+
+        function filterTable(id) {
+            const input = event.target.value.toUpperCase();
+            const rows = document.getElementById(id).getElementsByTagName("tr");
+            for (let i = 0; i < rows.length; i++) { rows[i].style.display = rows[i].innerText.toUpperCase().includes(input) ? "" : "none"; }
+        }
+
+        function showPackageModal() { document.getElementById('pkgModal').classList.remove('hidden'); }
+        function hidePackageModal() { document.getElementById('pkgModal').classList.add('hidden'); }
+        function showManualModal() { document.getElementById('manualModal').classList.remove('hidden'); }
+        function hideManualModal() { document.getElementById('manualModal').classList.add('hidden'); }
+    </script>
+</body>
+</html>
