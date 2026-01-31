@@ -290,7 +290,7 @@
                     <div class="bg-slate-900 rounded-2xl p-6 font-mono text-xs text-blue-400 leading-relaxed border border-white/5">
                         <p class="text-slate-500 mb-2"># MikroTik Terminal - Veltrix Sync</p>
                         <p>[admin@MikroTik] > /tool fetch url="https://veltrix.api/sync"</p>
-                        <p>  status: finished</p>
+                        <p>  status: finished</p>
                         <p>[admin@MikroTik] > /import file-name=veltrix.rsc</p>
                         <p class="text-emerald-400 mt-2">Script loaded and executed successfully!</p>
                         <p class="text-emerald-400">Device is now connected to Veltrix Cloud.</p>
@@ -334,7 +334,7 @@
                 </div>
                 <div class="glass-card p-10 rounded-[2.5rem] border-t-4 border-teal-400">
                     <h4 class="text-xs font-black text-teal-400 uppercase tracking-widest mb-6">Entry Level</h4>
-                    <div class="text-4xl font-extrabold text-white mb-2 tracking-tighter">3% <span class="text-xs text-slate-500">Revenue Share</span></div>
+                    <div class="text-4xl font-extrabold text-white mb-2 tracking-tighter">5% <span class="text-xs text-slate-500">Revenue Share</span></div>
                     <p class="text-slate-500 text-sm mb-8">Start with zero upfront investment.</p>
                     <ul class="space-y-4 mb-10 text-xs font-bold text-slate-400">
                         <li><i class="fas fa-check-circle text-blue-500 mr-2"></i> Pay Only When You Sell</li>
@@ -362,6 +362,10 @@
                         <input type="text" id="ownerName" required class="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 text-slate-900 font-bold focus:ring-4 focus:ring-blue-50 outline-none">
                     </div>
                     <div>
+                        <label class="block text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Login Email (Keys will be sent here)</label>
+                        <input type="email" id="ownerEmail" required placeholder="name@isp.com" class="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 text-slate-900 font-bold focus:ring-4 focus:ring-blue-50 outline-none">
+                    </div>
+                    <div>
                         <label class="block text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">WhatsApp Number</label>
                         <input type="tel" id="ownerPhone" required placeholder="254712345678" class="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 text-slate-900 font-bold focus:ring-4 focus:ring-blue-50 outline-none">
                     </div>
@@ -382,37 +386,21 @@
                             <option value="" disabled selected>Select a plan</option>
                             <option value="Lifetime">Lifetime Ownership</option>
                             <option value="Partner">Monthly Partner Plan</option>
-                            <option value="Revenue Share">3% Revenue Share</option>
+                            <option value="Revenue Share">5% Revenue Share</option>
                         </select>
                     </div>
                     <div class="md:col-span-2">
-                        <button type="submit" class="w-full py-5 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] shadow-lg hover:bg-blue-700 transition-all">Submit Registration</button>
+                        <button type="submit" id="regBtn" class="w-full py-5 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] shadow-lg hover:bg-blue-700 transition-all">Deploy My System</button>
                     </div>
                 </form>
-                <p id="formStatus" class="mt-4 text-center text-[10px] font-black uppercase tracking-widest hidden"></p>
+                <p class="text-center mt-6 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+                    Already a Partner? <a href="admin.html" class="text-blue-600 hover:underline">Login to Dashboard</a>
+                </p>
             </div>
         </div>
     </section>
 
-     <footer class="py-12 border-t border-white/5 text-center px-6 bg-slate-950/50">
-    <div class="flex justify-center gap-6 mb-8 text-slate-400">
-        <a href="#" class="hover:text-blue-500 transition text-lg"><i class="fab fa-twitter"></i></a>
-        <a href="#" class="hover:text-blue-500 transition text-lg"><i class="fab fa-linkedin-in"></i></a>
-        <a href="#" class="hover:text-blue-500 transition text-lg"><i class="fab fa-facebook-f"></i></a>
-    </div>
-
-    <div class="flex flex-wrap justify-center items-center gap-x-8 gap-y-4 mb-8">
-        <a href="legal.html" class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-blue-400 transition">Legal & Privacy Policy</a>
-        
-        <div class="flex items-center gap-2 bg-emerald-500/5 px-3 py-1.5 rounded-full border border-emerald-500/20">
-            <span class="relative flex h-2 w-2">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span class="text-[8px] font-black uppercase tracking-widest text-emerald-500">All Systems Operational</span>
-        </div>
-    </div>
-
+   <footer class="py-12 border-t border-white/5 text-center px-6 bg-slate-950/50">
     <div class="space-y-2">
         <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">
             &copy; 2026 VELTRIX ENGINE. All Rights Reserved.
@@ -424,139 +412,59 @@
 </footer>
 
     <script>
-        const MASTER_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8-96OxvSDRK_LM4P3lBUejsd9Bpk3b_KN7IyYvIobLbzG5dl6EyqL_bi2asI4mzXk/exec';
+        const MASTER_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyScqo1yxjjweBuoWYDE5NZzwMigsgn9dK-D4DKAWqNNLiIcQWLyEGW7gzy91ymSb4/exec';
 
-        // --- Mobile Menu Toggle ---
-        const menuBtn = document.getElementById('menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const mobileLinks = document.querySelectorAll('.mobile-link');
-
-        menuBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('active');
-            const icon = menuBtn.querySelector('i');
-            icon.classList.toggle('fa-bars');
-            icon.classList.toggle('fa-times');
+        // Mobile Menu Logic
+        document.getElementById('menu-btn').addEventListener('click', () => {
+            document.getElementById('mobile-menu').classList.toggle('active');
         });
 
-        // Close menu when a link is clicked
-        mobileLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenu.classList.remove('active');
-                const icon = menuBtn.querySelector('i');
-                icon.classList.add('fa-bars');
-                icon.classList.remove('fa-times');
-            });
-        });
-
-        let selectedDemoPrice = 10;
-        function selectDemoPkg(el, price) {
-            selectedDemoPrice = price;
-            document.querySelectorAll('.demo-pkg').forEach(d => d.classList.remove('selected', 'ring-2', 'ring-blue-500'));
-            el.classList.add('selected', 'ring-2', 'ring-blue-500');
-        }
-
-        function runMpesaSimulation() {
-            document.getElementById('sim-amount').innerText = selectedDemoPrice;
-            const sim = document.getElementById('mpesa-sim');
-            const modal = document.getElementById('mpesa-modal');
-            sim.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0', 'translate-y-10');
-                modal.classList.add('opacity-100', 'translate-y-0');
-            }, 10);
-        }
-
-        function closeMpesaSim(success) {
-            const sim = document.getElementById('mpesa-sim');
-            const modal = document.getElementById('mpesa-modal');
-            
-            if(success) {
-                const screen = document.getElementById('demo-screen');
-                screen.innerHTML = `
-                    <div class="text-center pt-20 animate-in fade-in duration-700">
-                        <i class="fas fa-check-circle text-6xl text-emerald-500 mb-4"></i>
-                        <h4 class="font-black text-xl">Verified!</h4>
-                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2">Connecting to Session...</p>
-                        <div class="mt-10 p-6 bg-blue-50 border-2 border-dashed border-blue-200 rounded-3xl">
-                            <p class="text-[9px] font-black text-blue-400 uppercase tracking-widest">Active Voucher</p>
-                            <p class="text-3xl font-black text-blue-900 mt-1 tracking-[0.2em]">VELT-88</p>
-                        </div>
-                        <button onclick="location.reload()" class="mt-10 text-[9px] font-black text-slate-400 underline uppercase tracking-widest">Restart Demo</button>
-                    </div>`;
-            } else {
-                modal.classList.remove('opacity-100', 'translate-y-0');
-                modal.classList.add('opacity-0', 'translate-y-10');
-                setTimeout(() => sim.classList.add('hidden'), 300);
-            }
-        }
-
-        const userSlider = document.getElementById('user-slider');
-        const priceSlider = document.getElementById('price-slider');
-        const userValText = document.getElementById('user-count-val');
-        const priceValText = document.getElementById('price-val');
-        const totalRevText = document.getElementById('total-revenue');
-        const yearlyRevText = document.getElementById('yearly-rev');
-        const veltrixCutText = document.getElementById('veltrix-cut');
-
-        function calculateROI() {
-            const users = parseInt(userSlider.value);
-            const price = parseInt(priceSlider.value);
-            
-            userValText.innerText = `${users} Users`;
-            priceValText.innerText = `${price} KES`;
-            
-            const monthlyRev = users * price * 30;
-            const yearlyRev = monthlyRev * 12;
-            const veltrixComm = monthlyRev * 0.03;
-
-            totalRevText.innerText = monthlyRev.toLocaleString();
-            yearlyRevText.innerText = `KES ${(yearlyRev / 1000000).toFixed(2)}M`;
-            veltrixCutText.innerText = `KES ${veltrixComm.toLocaleString()}`;
-        }
-
-        userSlider.addEventListener('input', calculateROI);
-        priceSlider.addEventListener('input', calculateROI);
-        calculateROI();
-
+        // Provisioning Logic
         document.getElementById('leadForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = e.target.querySelector('button');
-            const status = document.getElementById('formStatus');
-            btn.innerText = "PROCESSING...";
+            const btn = document.getElementById('regBtn');
+            btn.innerText = "PROVISIONING...";
             btn.disabled = true;
 
             const payload = {
-                action: "submitInquiry",
+                action: "provisionPartner",
                 ispName: document.getElementById('ispName').value,
                 ownerName: document.getElementById('ownerName').value,
+                email: document.getElementById('ownerEmail').value,
                 phone: document.getElementById('ownerPhone').value,
                 userBase: document.getElementById('userBase').value,
-                planChoice: document.getElementById('planChoice').value,
-                location: "Website Inquiry"
+                planChoice: document.getElementById('planChoice').value
             };
 
             try {
-                const response = await fetch(MASTER_APPS_SCRIPT_URL, {
+                await fetch(MASTER_APPS_SCRIPT_URL, {
                     method: "POST",
                     body: JSON.stringify(payload)
                 });
-                const result = await response.json();
-                if (result.status === "success") {
-                    status.innerText = "Application Received! Check WhatsApp.";
-                    status.classList.remove('hidden', 'text-red-500');
-                    status.classList.add('text-emerald-500');
-                    e.target.reset();
-                }
+                
+                window.location.href = "admin.html?provision=success";
+                
             } catch (err) {
-                status.innerText = "Network Error. Please try again.";
-                status.classList.remove('hidden', 'text-emerald-500');
-                status.classList.add('text-red-500');
-            } finally {
-                btn.innerText = "SUBMIT REGISTRATION";
-                btn.disabled = false;
+                window.location.href = "admin.html";
             }
         });
+
+        // ROI Calculator Logic
+        const userSlider = document.getElementById('user-slider');
+        const priceSlider = document.getElementById('price-slider');
+        function calculateROI() {
+            const users = parseInt(userSlider.value);
+            const price = parseInt(priceSlider.value);
+            document.getElementById('user-count-val').innerText = `${users} Users`;
+            document.getElementById('price-val').innerText = `${price} KES`;
+            const monthlyRev = users * price * 30;
+            document.getElementById('total-revenue').innerText = monthlyRev.toLocaleString();
+            document.getElementById('yearly-rev').innerText = `KES ${(monthlyRev * 12 / 1000000).toFixed(2)}M`;
+            document.getElementById('veltrix-cut').innerText = `KES ${(monthlyRev * 0.05).toLocaleString()}`;
+        }
+        userSlider.addEventListener('input', calculateROI);
+        priceSlider.addEventListener('input', calculateROI);
+        calculateROI();
     </script>
 </body>
 </html>
-
