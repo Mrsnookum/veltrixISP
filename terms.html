@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service - Veltrix ISP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-[#f8fafc] font-sans text-slate-800 antialiased selection:bg-blue-200">
+
+    <nav class="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <a href="index.html" class="text-xl font-black tracking-tight text-slate-900">Veltrix<span class="text-blue-600">ISP</span></a>
+            <a href="index.html" class="text-sm font-bold text-slate-500 hover:text-blue-600 transition">Back to Home</a>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto px-6 py-12 md:py-20">
+        <div class="text-center mb-16">
+            <h1 class="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">Terms of Service</h1>
+            <p class="text-slate-500 font-medium max-w-2xl mx-auto">Please read these terms carefully before using the Veltrix ISP Billing and Management Platform. Last updated: March 2026.</p>
+        </div>
+
+        <div class="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-sm border border-slate-200 space-y-10 leading-relaxed text-slate-600">
+            
+            <section>
+                <h2 class="text-2xl font-black text-slate-900 mb-4 flex items-center gap-3"><i class="fas fa-shield-alt text-blue-500"></i> 1. Platform Usage & Liability</h2>
+                <p class="mb-3">Veltrix ISP provides a cloud-based billing and radius management platform software. We are a software provider, not an Internet Service Provider (ISP). By using our platform, you agree that:</p>
+                <ul class="list-disc pl-6 space-y-2 text-sm font-medium">
+                    <li>You are solely responsible for the legal compliance of the internet service you provide to your end-users.</li>
+                    <li>Veltrix is not liable for hardware failures, router misconfigurations, or localized power outages affecting your MikroTik devices.</li>
+                    <li>You will not use the platform to facilitate illegal activities, distribute malware, or breach local telecommunications regulations.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2 class="text-2xl font-black text-slate-900 mb-4 flex items-center gap-3"><i class="fas fa-credit-card text-blue-500"></i> 2. Payment Gateways & Custom Integrations</h2>
+                <p class="mb-3">The Veltrix platform natively supports automated M-Pesa billing via the PayHero API. Regarding payments:</p>
+                <ul class="list-disc pl-6 space-y-2 text-sm font-medium">
+                    <li><strong class="text-slate-900">Default Gateway:</strong> Clients utilizing the default PayHero integration must adhere to PayHero's standard terms of service and transaction limits.</li>
+                    <li><strong class="text-slate-900">Custom Integrations:</strong> We recognize that not all ISPs use PayHero. Veltrix offers custom API integrations for alternative payment gateways (e.g., Safaricom Daraja, Stripe, Flutterwave, etc.) upon request. Custom integrations may be subject to additional enterprise setup fees.</li>
+                    <li><strong class="text-slate-900">Disputes:</strong> Veltrix does not hold or process end-user funds. All funds flow directly to your configured merchant accounts. Refunds and disputes must be handled directly between the ISP owner and the end-user.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2 class="text-2xl font-black text-slate-900 mb-4 flex items-center gap-3"><i class="fas fa-user-lock text-blue-500"></i> 3. Data Privacy & Security</h2>
+                <p class="mb-3">We take the privacy of you and your end-users seriously.</p>
+                <ul class="list-disc pl-6 space-y-2 text-sm font-medium">
+                    <li>We temporarily store end-user phone numbers and MAC addresses strictly for the purpose of session authentication and automated expiry.</li>
+                    <li>Veltrix will never sell, rent, or distribute your client data to third-party marketers.</li>
+                    <li>Router credentials (API Usernames and Passwords) are encrypted. However, we strongly recommend creating a restricted "API-Only" user group on your MikroTik router for use with our platform.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2 class="text-2xl font-black text-slate-900 mb-4 flex items-center gap-3"><i class="fas fa-power-off text-blue-500"></i> 4. Service Suspension</h2>
+                <p class="mb-3">Veltrix reserves the right to suspend or terminate tenant access to the dashboard and API for the following reasons:</p>
+                <ul class="list-disc pl-6 space-y-2 text-sm font-medium">
+                    <li>Failure to pay monthly SaaS subscription fees to Veltrix.</li>
+                    <li>Detected abuse of the API endpoints or malicious hacking attempts.</li>
+                    <li>Violation of any terms listed in this agreement.</li>
+                </ul>
+            </section>
+
+        </div>
+    </div>
+
+    <footer class="bg-slate-900 py-8 border-t border-slate-800 text-center text-slate-400 text-sm">
+        <p>&copy; 2026 Veltrix ISP. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

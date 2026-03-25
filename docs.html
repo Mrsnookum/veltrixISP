@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - Veltrix ISP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        html { scroll-behavior: smooth; }
+        /* Custom scrollbar for sidebar */
+        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-white font-sans text-slate-800 antialiased">
+
+    <nav class="bg-white border-b border-slate-200 px-4 md:px-6 py-4 fixed w-full top-0 z-50 flex items-center justify-between">
+        <div class="flex items-center gap-4 max-w-7xl mx-auto w-full justify-between">
+            <div class="flex items-center gap-3">
+                <button id="mobileMenuBtn" class="md:hidden text-slate-500 hover:text-blue-600 focus:outline-none">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <a href="index.html" class="text-xl font-black tracking-tight text-slate-900">Veltrix<span class="text-blue-600">Docs</span></a>
+            </div>
+            <div class="text-sm font-bold text-slate-500">
+                <a href="admin.html" class="hover:text-blue-600 transition bg-slate-50 px-4 py-2 rounded-lg border border-slate-100">Admin Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/40 z-40 hidden backdrop-blur-sm transition-opacity opacity-0 md:hidden"></div>
+
+    <div class="max-w-7xl mx-auto flex pt-16">
+        
+        <aside id="docsSidebar" class="w-64 fixed h-full md:h-[calc(100vh-4rem)] border-r border-slate-200 py-8 px-6 bg-white z-50 top-0 md:top-16 sidebar-scroll overflow-y-auto transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out shadow-2xl md:shadow-none">
+            
+            <div class="flex justify-between items-center mb-8 md:hidden mt-4">
+                <span class="font-black text-slate-900 tracking-tight">Navigation</span>
+                <button id="closeMenuBtn" class="text-slate-400 hover:text-slate-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Getting Started</h4>
+            <ul class="space-y-3 mb-8 text-sm font-medium text-slate-600">
+                <li><a href="#intro" class="hover:text-blue-600 transition block">Introduction</a></li>
+                <li><a href="#hardware" class="hover:text-blue-600 transition block">Hardware Requirements</a></li>
+            </ul>
+
+            <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">MikroTik Setup (Phases 1-5)</h4>
+            <ul class="space-y-3 mb-8 text-sm font-medium text-slate-600">
+                <li><a href="#phase1" class="hover:text-blue-600 transition block">1. Physical Connection</a></li>
+                <li><a href="#phase2" class="hover:text-blue-600 transition block">2. Internet Access</a></li>
+                <li><a href="#phase3" class="hover:text-blue-600 transition block">3. Hotspot Creation</a></li>
+                <li><a href="#phase4" class="hover:text-blue-600 transition block">4. Linking the API</a></li>
+                <li><a href="#phase5" class="hover:text-blue-600 transition block">5. Uploading Portal</a></li>
+            </ul>
+
+            <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Billing & Integration</h4>
+            <ul class="space-y-3 text-sm font-medium text-slate-600 pb-10 md:pb-0">
+                <li><a href="#payhero" class="hover:text-blue-600 transition block">PayHero STK Setup</a></li>
+                <li><a href="#custom-gateway" class="hover:text-blue-600 transition block">Custom Gateways</a></li>
+            </ul>
+        </aside>
+
+        <main class="flex-1 md:ml-64 px-5 md:px-12 py-8 lg:py-16 max-w-4xl w-full">
+            
+            <div id="intro" class="mb-12 md:mb-16">
+                <h1 class="text-3xl md:text-4xl font-black text-slate-900 mb-4 tracking-tight leading-tight">System Documentation</h1>
+                <p class="text-base md:text-lg text-slate-500 leading-relaxed mb-6">Welcome to Veltrix. This guide will walk you through configuring your MikroTik router and setting up automated M-Pesa billing for your Wi-Fi Hotspot.</p>
+            </div>
+
+            <hr class="border-slate-100 my-8 md:my-12">
+
+            <div id="hardware" class="mb-12 md:mb-16 scroll-mt-24">
+                <h2 class="text-xl md:text-2xl font-black text-slate-900 mb-4">Hardware Requirements</h2>
+                <p class="text-sm md:text-base text-slate-600 mb-6 leading-relaxed">To ensure seamless operation with Veltrix ISP, you will need the following hardware:</p>
+                <div class="bg-white border border-slate-200 shadow-sm rounded-2xl p-5 md:p-6 mb-6">
+                    <ul class="space-y-4 text-sm md:text-base text-slate-700">
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-microchip text-blue-500 mt-1 shrink-0"></i>
+                            <div>
+                                <strong class="text-slate-900">MikroTik Router:</strong> 
+                                RouterOS v6 or v7 (v7 recommended). Popular models include hEX (RB750Gr3) for small setups or RB4011 for medium to large networks.
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-network-wired text-blue-500 mt-1 shrink-0"></i>
+                            <div>
+                                <strong class="text-slate-900">Active Internet Connection:</strong>
+                                A stable WAN connection from a primary ISP (e.g., fiber, dedicated wireless, or 4G/5G modem).
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-laptop text-blue-500 mt-1 shrink-0"></i>
+                            <div>
+                                <strong class="text-slate-900">Configuration Device:</strong>
+                                A laptop or PC with an Ethernet port to run WinBox for the initial setup.
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fas fa-wifi text-blue-500 mt-1 shrink-0"></i>
+                            <div>
+                                <strong class="text-slate-900">Access Points (Optional but Recommended):</strong>
+                                External access points connected to your MikroTik to broadcast the Wi-Fi signal to your clients (e.g., Ubiquiti, TP-Link, or Cambium).
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <hr class="border-slate-100 my-8 md:my-12">
+
+            <div id="phase1" class="mb-12 md:mb-16 scroll-mt-24">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest mb-4">Phase 1</div>
+                <h2 class="text-xl md:text-2xl font-black text-slate-900 mb-4">Physical Setup & First Login</h2>
+                <p class="text-sm md:text-base text-slate-600 mb-6 leading-relaxed">Before configuring software, ensure your hardware is properly connected.</p>
+                
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 md:p-6 mb-6">
+                    <ul class="space-y-4 text-sm md:text-base text-slate-700">
+                        <li class="flex gap-3"><i class="fas fa-check-circle text-green-500 mt-1 shrink-0"></i> <div><strong>Internet In:</strong> Plug the cable from your ISP (Safaricom, Zuku, etc.) into <strong>Port 1</strong> of the MikroTik.</div></li>
+                        <li class="flex gap-3"><i class="fas fa-check-circle text-green-500 mt-1 shrink-0"></i> <div><strong>PC Connection:</strong> Plug your laptop into <strong>Port 2</strong> using an Ethernet cable.</div></li>
+                        <li class="flex gap-3"><i class="fas fa-check-circle text-green-500 mt-1 shrink-0"></i> <div><strong>WinBox:</strong> Open WinBox, click the "Neighbors" tab, click your router's MAC address, and login with Username: <code class="bg-white px-1 py-0.5 rounded border border-slate-200">admin</code> and leave the password blank.</div></li>
+                    </ul>
+                </div>
+                <div class="w-full h-48 md:h-64 bg-slate-100 rounded-2xl border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 font-bold mb-4 text-sm md:text-base text-center px-4">
+                    <i class="fas fa-image text-2xl md:text-3xl mr-2"></i> [Add WinBox Login Screenshot Here]
+                </div>
+            </div>
+
+            <div id="phase2" class="mb-12 md:mb-16 scroll-mt-24">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest mb-4">Phase 2</div>
+                <h2 class="text-xl md:text-2xl font-black text-slate-900 mb-4">Providing Internet Access to the Router</h2>
+                <p class="text-sm md:text-base text-slate-600 mb-4 leading-relaxed">The MikroTik needs an internet connection before it can serve your clients. This is usually done via a DHCP Client.</p>
+                
+                <ol class="list-decimal pl-5 space-y-3 md:space-y-4 text-sm md:text-base text-slate-700 mb-6 font-medium marker:text-blue-600 marker:font-black">
+                    <li>In WinBox, go to <strong>IP > DHCP Client</strong>.</li>
+                    <li>Click the <strong>+</strong> (Add) button.</li>
+                    <li>Select <strong>ether1</strong> (or whichever port your main internet line is plugged into) as the interface.</li>
+                    <li>Ensure "Use Peer DNS" and "Use Peer NTP" are checked.</li>
+                    <li>Click <strong>Apply</strong> and <strong>OK</strong>. You should see it acquire an IP address and show a status of "bound".</li>
+                </ol>
+                 <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 md:p-5 mb-6 text-sm text-slate-600 italic">
+                    Note: If your ISP provides a static IP or uses PPPoE, configure that connection under <strong>IP > Addresses</strong> and <strong>IP > Routes</strong>, or using the PPPoE Client interface instead.
+                </div>
+                <div class="w-full h-48 md:h-64 bg-slate-100 rounded-2xl border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 font-bold mb-4 text-sm md:text-base text-center px-4">
+                    <i class="fas fa-image text-2xl md:text-3xl mr-2"></i> [Add DHCP Client Screenshot Here]
+                </div>
+            </div>
+
+            <div id="phase3" class="mb-12 md:mb-16 scroll-mt-24">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest mb-4">Phase 3</div>
+                <h2 class="text-xl md:text-2xl font-black text-slate-900 mb-4">Creating the Hotspot Server</h2>
+                <p class="text-sm md:text-base text-slate-600 mb-4 leading-relaxed">Now we create the network that will serve the captive portal to your clients.</p>
+                
+                <ol class="list-decimal pl-5 space-y-3 md:space-y-4 text-sm md:text-base text-slate-700 mb-6 font-medium marker:text-blue-600 marker:font-black">
+                    <li>First, assign an IP address to the port serving your local network (e.g., ether2). Go to <strong>IP > Addresses</strong>, click <strong>+</strong>, enter an address like <code>10.0.0.1/24</code>, and select <strong>ether2</strong>.</li>
+                    <li>Go to <strong>IP > Hotspot</strong>.</li>
+                    <li>Click the <strong>Hotspot Setup</strong> button (do not click the + button).</li>
+                    <li>Follow the setup wizard:
+                        <ul class="list-disc pl-5 mt-2 space-y-2 text-slate-600">
+                            <li><strong>Hotspot Interface:</strong> Select <strong>ether2</strong> (or your bridge if you have multiple ports).</li>
+                            <li><strong>Local Address of Network:</strong> Keep the default (e.g., 10.0.0.1/24).</li>
+                            <li><strong>Address Pool:</strong> Keep the default.</li>
+                            <li><strong>Select Certificate:</strong> Choose "none".</li>
+                            <li><strong>IP Address of SMTP:</strong> Keep 0.0.0.0.</li>
+                            <li><strong>DNS Servers:</strong> Add <code>8.8.8.8</code> and <code>8.8.4.4</code>.</li>
+                            <li><strong>DNS Name:</strong> Enter a domain name for your login page (e.g., <code>login.veltrix</code>). This must match the DNS name in your Veltrix dashboard later.</li>
+                            <li><strong>Name of Local Hotspot User:</strong> Leave default.</li>
+                        </ul>
+                    </li>
+                </ol>
+                <div class="w-full h-48 md:h-64 bg-slate-100 rounded-2xl border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 font-bold mb-4 text-sm md:text-base text-center px-4">
+                    <i class="fas fa-image text-2xl md:text-3xl mr-2"></i> [Add Hotspot Setup Screenshot Here]
+                </div>
+            </div>
+
+            <div id="phase4" class="mb-12 md:mb-16 scroll-mt-24">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest mb-4">Phase 4</div>
+                <h2 class="text-xl md:text-2xl font-black text-slate-900 mb-4">Linking the Billing API</h2>
+                <p class="text-sm md:text-base text-slate-600 mb-4 leading-relaxed">This is the most critical step. It allows the Veltrix cloud dashboard to automatically authenticate users and expire them when their time is up.</p>
+                
+                <ol class="list-decimal pl-5 space-y-3 md:space-y-4 text-sm md:text-base text-slate-700 mb-6 font-medium marker:text-blue-600 marker:font-black">
+                    <li>Go to your Veltrix Admin Dashboard and open the <strong>MikroTik Tab</strong>.</li>
+                    <li>Enter your preferred API Username and Password.</li>
+                    <li>Click <strong>Save & Generate Script</strong>.</li>
+                    <li>Copy the generated green code block.</li>
+                    <li>In WinBox, click <strong>New Terminal</strong> on the left menu, paste the code, and press Enter.</li>
+                </ol>
+
+                <div class="bg-[#0f172a] rounded-2xl p-4 md:p-6 border border-slate-800 font-mono text-xs md:text-sm text-emerald-400 overflow-x-auto">
+<pre><code>/user add name="api_user" group=full password="your_password"
+/ip service set api disabled=no port=8728
+/ip service set api-ssl disabled=no port=8729
+/ip cloud set ddns-enabled=yes</code></pre>
+                </div>
+            </div>
+
+            <div id="phase5" class="mb-12 md:mb-16 scroll-mt-24">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-widest mb-4">Phase 5</div>
+                <h2 class="text-xl md:text-2xl font-black text-slate-900 mb-4">Uploading the Portal Redirect</h2>
+                <p class="text-sm md:text-base text-slate-600 mb-4 leading-relaxed">You must replace the default MikroTik login page so users are directed to your custom Veltrix billing portal.</p>
+                
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 md:p-5 rounded-r-xl mb-6">
+                    <p class="text-blue-800 text-xs md:text-sm leading-relaxed"><strong>Tip:</strong> In your Admin Dashboard (Setup Guide tab), there is a button to dynamically download your specific <code class="bg-white px-1 py-0.5 rounded">login.html</code> file. Download it there.</p>
+                </div>
+
+                <p class="text-sm md:text-base text-slate-700 font-medium mb-4 leading-relaxed">In WinBox, click <strong>Files</strong>. Locate the <code class="bg-slate-100 px-1 py-0.5 rounded border border-slate-200">hotspot</code> folder. Drag and drop your downloaded <code>login.html</code> directly into this folder, overwriting the old one.</p>
+                
+                <div class="w-full h-48 md:h-64 bg-slate-100 rounded-2xl border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 font-bold text-sm md:text-base text-center px-4">
+                    <i class="fas fa-file-code text-2xl md:text-3xl mr-2"></i> [Add Drag-and-Drop Files Screenshot Here]
+                </div>
+            </div>
+
+            <hr class="border-slate-100 my-8 md:my-12">
+
+            <div id="payhero" class="mb-12 md:mb-16 scroll-mt-24">
+                <h2 class="text-2xl md:text-3xl font-black text-slate-900 mb-4">Configuring PayHero (M-Pesa)</h2>
+                <p class="text-sm md:text-base text-slate-600 mb-6 leading-relaxed">Veltrix natively supports PayHero for automated M-Pesa STK Pushes.</p>
+                
+                <ol class="list-decimal pl-5 space-y-3 md:space-y-4 text-sm md:text-base text-slate-700 font-medium marker:text-blue-600 marker:font-black">
+                    <li>Create an account at <a href="https://payhero.co.ke" target="_blank" class="text-blue-600 hover:underline">PayHero Kenya</a>.</li>
+                    <li>Link your Paybill or Till Number.</li>
+                    <li>Navigate to Developers > API Keys.</li>
+                    <li>Copy your <strong class="text-slate-900">Channel ID</strong> and your base64 encoded <strong class="text-slate-900">Basic Auth Token</strong>.</li>
+                    <li>Paste these into the <strong>API Settings</strong> tab in your Veltrix Admin Dashboard.</li>
+                </ol>
+            </div>
+
+            <div id="custom-gateway" class="mb-10 md:mb-16 scroll-mt-24">
+                <div class="bg-slate-900 rounded-3xl p-6 md:p-8 text-white relative overflow-hidden shadow-2xl">
+                    <div class="absolute top-0 right-0 w-48 h-48 md:w-64 md:h-64 bg-blue-600 rounded-full opacity-20 blur-3xl -mr-10 -mt-10"></div>
+                    <h2 class="text-xl md:text-2xl font-black mb-3 relative z-10">Need a Custom Payment Gateway?</h2>
+                    <p class="text-slate-300 text-xs md:text-sm leading-relaxed mb-6 max-w-lg relative z-10">While PayHero is our default automated gateway, we understand that established ISPs may prefer direct Daraja API integrations, Stripe, Flutterwave, or custom bank APIs to avoid third-party transaction fees.</p>
+                    <a href="mailto:support@veltrix.com?subject=Custom Gateway Integration Request" class="inline-block bg-white text-slate-900 font-black px-5 py-3 md:px-6 md:py-3 rounded-xl text-[10px] md:text-sm uppercase tracking-widest hover:bg-blue-50 transition relative z-10 w-full text-center md:w-auto">
+                        Request Custom Integration
+                    </a>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        const sidebar = document.getElementById('docsSidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const mobileBtn = document.getElementById('mobileMenuBtn');
+        const closeBtn = document.getElementById('closeMenuBtn');
+        
+        function toggleSidebar() {
+            const isOpen = !sidebar.classList.contains('-translate-x-full');
+            if (isOpen) {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            } else {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            }
+        }
+
+        mobileBtn.addEventListener('click', toggleSidebar);
+        closeBtn.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+
+        document.querySelectorAll('#docsSidebar a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth < 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
