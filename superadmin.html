@@ -73,6 +73,9 @@
                 </div>
             </div>
             <div class="flex items-center gap-4">
+                <button id="addTenantBtn" class="hidden md:flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-full text-xs font-bold shadow-[0_0_15px_rgba(37,99,235,0.4)] transition">
+                    <i class="fas fa-plus"></i> Add ISP
+                </button>
                 <button id="refreshBtn" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 transition border border-slate-700" title="Refresh Data">
                     <i class="fas fa-sync-alt" id="refreshIcon"></i>
                 </button>
@@ -153,7 +156,7 @@
                                 <tr class="text-slate-400 text-[10px] uppercase tracking-widest">
                                     <th class="p-4 font-bold">Tenant ID</th>
                                     <th class="p-4 font-bold">ISP Entity</th>
-                                    <th class="p-4 font-bold">Router Health</th>
+                                    <th class="p-4 font-bold">Subscription Due</th>
                                     <th class="p-4 font-bold">Billing Status</th>
                                     <th class="p-4 font-bold text-right">Admin Actions</th>
                                 </tr>
@@ -166,6 +169,10 @@
 
             </div>
         </main>
+        
+        <button id="mobileAddBtn" class="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-[0_0_20px_rgba(37,99,235,0.5)] flex items-center justify-center text-2xl z-50">
+            <i class="fas fa-plus"></i>
+        </button>
     </div>
 
     <div id="confirmModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[200] hidden flex items-center justify-center p-4 transition-opacity">
@@ -178,6 +185,48 @@
             <div class="flex gap-3">
                 <button id="closeModalBtn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl transition text-sm">Cancel</button>
                 <button id="modalConfirmBtn" class="flex-1 text-white font-black py-3 rounded-xl transition text-sm uppercase tracking-widest shadow-lg">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addTenantModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[200] hidden flex items-center justify-center p-4">
+        <div class="glass-card p-8 rounded-3xl max-w-md w-full border border-slate-600 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-black text-white"><i class="fas fa-plus-circle text-blue-400 mr-2"></i> Provision New ISP</h3>
+                <button id="closeAddTenantBtn" class="text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <form id="addTenantForm" class="space-y-4">
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Business Name</label>
+                    <input type="text" id="newIspName" required class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg px-4 py-2 mt-1 focus:border-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Subdomain (prefix)</label>
+                    <input type="text" id="newIspSubdomain" required placeholder="e.g. kisiiwifi" class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg px-4 py-2 mt-1 focus:border-blue-500 focus:outline-none lowercase">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Admin Email</label>
+                    <input type="email" id="newIspEmail" required class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg px-4 py-2 mt-1 focus:border-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Default Admin Password</label>
+                    <input type="text" id="newIspPassword" required value="1234" class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg px-4 py-2 mt-1 focus:border-blue-500 focus:outline-none">
+                </div>
+                <button type="submit" id="submitTenantBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-3 rounded-xl transition text-sm shadow-[0_0_15px_rgba(37,99,235,0.4)] mt-4">PROVISION INSTANCE</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="billingModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[200] hidden flex items-center justify-center p-4">
+        <div class="glass-card p-8 rounded-3xl max-w-sm w-full border border-slate-600 shadow-2xl text-center">
+            <h3 class="text-xl font-black text-white mb-2"><i class="fas fa-calendar-alt text-purple-400 mr-2"></i> Update Subscription</h3>
+            <p class="text-xs text-slate-400 mb-6">Log a payment and extend the due date for <strong id="billingTenantName" class="text-white"></strong>.</p>
+            
+            <input type="date" id="newBillingDate" class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg px-4 py-3 mb-6 focus:border-purple-500 focus:outline-none text-center font-bold" style="color-scheme: dark;">
+            
+            <div class="flex gap-3">
+                <button id="closeBillingModalBtn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl transition text-sm">Cancel</button>
+                <button id="submitBillingBtn" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-black py-3 rounded-xl transition text-sm shadow-[0_0_15px_rgba(168,85,247,0.4)]">Update Date</button>
             </div>
         </div>
     </div>
