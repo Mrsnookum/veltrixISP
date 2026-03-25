@@ -3,429 +3,702 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Veltrix | Partner Admin Dashboard</title>
+    <title>Veltrix Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+        .settings-tab-content { display: none; }
+        .settings-tab-content.active { display: block; }
         @media (max-width: 768px) { .sidebar-hidden { transform: translateX(-100%); } }
-        .chart-cage { position: relative; height: 280px; width: 100%; }
-        .glass-sidebar { background: #0f172a; border-right: 1px solid rgba(255,255,255,0.05); }
-        .nav-btn.active { background: #3b82f6 !important; color: white !important; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3); }
-        .status-active { background-color: #dcfce7; color: #166534; } 
-        .status-expired { background-color: #fee2e2; color: #991b1b; } 
-        .guide-step { border-left: 4px solid #3b82f6; padding-left: 1.5rem; margin-bottom: 2rem; position: relative; }
-        .guide-step::before { content: ''; position: absolute; left: -10px; top: 0; width: 16px; height: 16px; background: #3b82f6; border-radius: 50%; }
+        .chart-cage { position: relative; width: 100%; }
+        
+        /* Modern Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Hide scrollbar for horizontal tabs on mobile */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Sidebar Group Header */
+        .nav-group-header { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; font-weight: 800; margin-top: 1.5rem; margin-bottom: 0.5rem; padding-left: 0.75rem; }
+        
+        /* Active Nav Button */
+        .nav-btn.active { background-color: #eff6ff; color: #2563eb; font-weight: 700; }
+        .nav-btn.active i { color: #2563eb; }
+
+        /* Custom Table Tabs */
+        .table-tab { padding: 0.75rem 1.5rem; font-size: 0.875rem; font-weight: 600; color: #64748b; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.2s; }
+        .table-tab:hover { color: #0f172a; }
+        .table-tab.active { color: #2563eb; border-bottom-color: #2563eb; }
+        .tab-badge { background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; margin-left: 6px; font-weight: 800; }
+        .table-tab.active .tab-badge { background: #dbeafe; color: #2563eb; }
+
+        /* Settings Sidebar Tabs */
+        .settings-tab-btn { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 600; color: #64748b; transition: all 0.2s; text-align: left; white-space: nowrap; }
+        .settings-tab-btn:hover { background-color: #f1f5f9; color: #0f172a; }
+        .settings-tab-btn.active { background-color: #eff6ff; color: #2563eb; }
     </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-900 overflow-x-hidden">
+<body class="bg-[#f8fafc] font-sans text-slate-800 overflow-hidden flex h-screen relative">
 
-    <div id="loginOverlay" class="fixed inset-0 bg-slate-950 z-[200] flex items-center justify-center p-4">
-        <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center">
-            <div class="w-16 h-16 bg-blue-600 rounded-2xl mx-auto mb-6 flex items-center justify-center text-white shadow-xl">
-                <i class="fas fa-bolt text-2xl"></i>
-            </div>
-            <h1 class="text-2xl font-black text-slate-900 mb-2">PARTNER LOGIN</h1>
-            <p class="text-slate-500 mb-8 text-sm">Enter the Access Key sent to your email</p>
-            <input type="text" id="partnerKeyInput" placeholder="VLT-XXXX-XXXX" 
-                   class="w-full p-4 border border-slate-200 rounded-2xl mb-4 text-center font-mono tracking-widest outline-none focus:ring-4 focus:ring-blue-500/20">
-            <button onclick="handleLogin()" id="loginBtn" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20">Access Dashboard</button>
-            <p id="loginError" class="text-red-500 mt-4 text-xs font-bold hidden"></p>
+    <div id="loginOverlay" class="fixed inset-0 bg-slate-900 z-[200] flex items-center justify-center p-4 transition-all duration-300">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md text-center">
+            <h1 class="text-2xl font-black text-slate-900 mb-2 uppercase">Management Access</h1>
+            <p class="text-slate-500 mb-6">Enter Admin Password to continue</p>
+            <input type="password" id="adminPassInput" placeholder="••••••••" 
+                   class="w-full p-4 border border-slate-200 rounded-xl mb-4 text-center text-xl tracking-widest outline-none focus:ring-2 focus:ring-blue-500">
+            <button id="loginBtn" onclick="checkLogin()" class="w-full bg-blue-600 text-white p-4 rounded-xl font-bold hover:bg-blue-700 transition disabled:opacity-50">Login to Dashboard</button>
+            <p id="loginError" class="text-red-500 mt-4 font-semibold hidden">Incorrect Password.</p>
         </div>
     </div>
 
-    <div class="md:hidden bg-[#0f172a] text-white p-4 flex justify-between items-center fixed top-0 w-full z-[100]">
-        <h1 class="font-black tracking-tight">VELTRIX ADMIN</h1>
-        <button onclick="toggleSidebar()"><i class="fas fa-bars text-xl"></i></button>
+    <div class="md:hidden bg-white border-b border-slate-200 p-4 flex justify-between items-center fixed top-0 w-full z-[100] h-16">
+        <h1 id="mobileBrandName" class="font-black text-blue-900 tracking-tight uppercase">Veltrix ISP</h1>
+        <button onclick="toggleSidebar()"><i class="fas fa-bars text-xl text-slate-600"></i></button>
     </div>
 
-    <div id="mainDashboard" class="flex min-h-screen opacity-0 transition-all duration-500 pointer-events-none pt-14 md:pt-0">
+    <div id="sidebar" class="fixed md:relative z-[110] w-64 bg-white border-r border-slate-200 flex flex-col h-screen transition-transform duration-300 sidebar-hidden md:transform-none shrink-0">
+        <div class="h-16 flex items-center px-6 border-b border-slate-100 shrink-0">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3 shadow-md shadow-blue-200">
+                <i class="fas fa-wifi text-white text-sm"></i>
+            </div>
+            <h1 id="sidebarBrandName" class="text-slate-900 text-lg font-black tracking-tight">Veltrix<span class="text-blue-600">ISP</span></h1>
+        </div>
+
+        <div class="flex-1 overflow-y-auto px-4 py-4">
+            <button id="btn-dashboard" onclick="switchTab('dashboard')" class="nav-btn active w-full flex items-center space-x-3 p-2.5 text-slate-600 hover:bg-slate-50 rounded-lg transition mb-1">
+                <i class="fas fa-home w-5 text-center text-slate-400"></i> <span class="text-sm font-medium">Dashboard</span>
+            </button>
+
+            <div class="nav-group-header">Users</div>
+            <button id="btn-users" onclick="switchTab('users')" class="nav-btn w-full flex items-center space-x-3 p-2.5 text-slate-600 hover:bg-slate-50 rounded-lg transition mb-1">
+                <i class="fas fa-users w-5 text-center text-slate-400"></i> <span class="text-sm font-medium">Active Users</span>
+            </button>
+            <button id="btn-expiry" onclick="switchTab('expiry')" class="nav-btn w-full flex items-center space-x-3 p-2.5 text-slate-600 hover:bg-slate-50 rounded-lg transition mb-1">
+                <i class="fas fa-user-clock w-5 text-center text-slate-400"></i> <span class="text-sm font-medium">Expiry Dates</span>
+            </button>
+            <button id="btn-bindings" onclick="switchTab('bindings')" class="nav-btn w-full flex items-center space-x-3 p-2.5 text-slate-600 hover:bg-slate-50 rounded-lg transition mb-1">
+                <i class="fas fa-network-wired w-5 text-center text-slate-400"></i> <span class="text-sm font-medium">IP Bindings</span>
+            </button>
+
+            <div class="nav-group-header">Finance</div>
+            <button id="btn-packages" onclick="switchTab('packages')" class="nav-btn w-full flex items-center space-x-3 p-2.5 text-slate-600 hover:bg-slate-50 rounded-lg transition mb-1">
+                <i class="fas fa-box-open w-5 text-center text-slate-400"></i> <span class="text-sm font-medium">Packages</span>
+            </button>
+            <button id="btn-transactions" onclick="switchTab('transactions')" class="nav-btn w-full flex items-center space-x-3 p-2.5 text-slate-600 hover:bg-slate-50 rounded-lg transition mb-1">
+                <i class="fas fa-money-bill-wave w-5 text-center text-slate-400"></i> <span class="text-sm font-medium">Payments</span>
+            </button>
+            <button onclick="showManualModal()" class="nav-btn w-full flex items-center space-x-3 p-2.5 text-slate-600 hover:bg-slate-50 rounded-lg transition mb-1">
+                <i class="fas fa-ticket-alt w-5 text-center text-slate-400"></i> <span class="text-sm font-medium">Gen Voucher</span>
+            </button>
+
+            <div class="nav-group-header">Devices</div>
+            <button id="btn-mikrotik" onclick="switchTab('mikrotik')" class="nav-btn w-full flex items-center space-x-3 p-2.5 text-slate-600 hover:bg-slate-50 rounded-lg transition mb-1">
+                <i class="fas fa-server w-5 text-center text-slate-400"></i> <span class="text-sm font-medium">MikroTik</span>
+            </button>
+            <button id="btn-apisettings" onclick="switchTab('apisettings')" class="nav-btn w-full flex items-center space-x-3 p-2.5 text-slate-600 hover:bg-slate-50 rounded-lg transition mb-1">
+                <i class="fas fa-code w-5 text-center text-slate-400"></i> <span class="text-sm font-medium">API Settings</span>
+            </button>
+
+            <div class="nav-group-header">Customization</div>
+            <button id="btn-portal" onclick="switchTab('portal')" class="nav-btn w-full flex items-center space-x-3 p-2.5 text-slate-600 hover:bg-slate-50 rounded-lg transition mb-1">
+                <i class="fas fa-paint-roller w-5 text-center text-slate-400"></i> <span class="text-sm font-medium">Portal Branding</span>
+            </button>
+
+            <div class="nav-group-header">System</div>
+            <button id="btn-guide" onclick="switchTab('guide')" class="nav-btn w-full flex items-center space-x-3 p-2.5 text-slate-600 hover:bg-slate-50 rounded-lg transition mb-1">
+                <i class="fas fa-book w-5 text-center text-slate-400"></i> <span class="text-sm font-medium">Setup Guide</span>
+            </button>
+        </div>
+
+        <div class="p-4 border-t border-slate-100 shrink-0">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-slate-200 border-2 border-white shadow-sm flex items-center justify-center text-slate-500 font-bold">AD</div>
+                <div>
+                    <p class="text-sm font-bold text-slate-900 leading-tight">Admin User</p>
+                    <p class="text-[10px] text-slate-500">Super Administrator</p>
+                </div>
+            </div>
+            <button onclick="logout()" class="w-full flex items-center justify-center space-x-2 p-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition">
+                <i class="fas fa-sign-out-alt"></i> <span>Sign Out</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="mainContent" class="flex-1 flex flex-col h-screen overflow-hidden pt-16 md:pt-0 blur-md opacity-0 transition-all duration-500 pointer-events-none">
         
-        <div id="sidebar" class="fixed md:relative z-[110] w-72 glass-sidebar text-slate-400 p-8 flex flex-col min-h-screen transition-transform duration-300 sidebar-hidden md:transform-none">
-            <div class="flex items-center gap-3 mb-12">
-                <div class="p-2 bg-blue-600 rounded-lg text-white"><i class="fas fa-bolt text-xs"></i></div>
-                <h1 id="brandName" class="text-white text-xl font-black tracking-tighter uppercase">VELTRIX</h1>
+        <div class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-6 shrink-0 shadow-sm z-10 relative">
+            <div class="relative hidden md:block w-96">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input type="text" placeholder="Search users, payments, or packages..." 
+                       class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
             </div>
-
-            <nav class="space-y-2 flex-1">
-                <button id="btn-dashboard" onclick="switchTab('dashboard', this)" class="nav-btn active w-full flex items-center gap-4 p-4 rounded-2xl transition-all font-bold text-sm text-left">
-                    <i class="fas fa-chart-pie"></i> Overview
-                </button>
-                <button id="btn-packages" onclick="switchTab('packages', this)" class="nav-btn w-full flex items-center gap-4 p-4 rounded-2xl transition-all font-bold text-sm text-left">
-                    <i class="fas fa-box-open"></i> Packages
-                </button>
-                <button id="btn-transactions" onclick="switchTab('transactions', this)" class="nav-btn w-full flex items-center gap-4 p-4 rounded-2xl transition-all font-bold text-sm text-left">
-                    <i class="fas fa-history"></i> History
-                </button>
-                <button id="btn-billing" onclick="switchTab('billing', this)" class="nav-btn w-full flex items-center gap-4 p-4 rounded-2xl transition-all font-bold text-sm text-left">
-                    <i class="fas fa-file-invoice-dollar"></i> Platform Billing
-                </button>
-                <button id="btn-mikrotik" onclick="switchTab('mikrotik', this)" class="nav-btn w-full flex items-center gap-4 p-4 rounded-2xl transition-all font-bold text-sm text-left">
-                    <i class="fas fa-server"></i> MikroTik Setup
-                </button>
-                <button id="btn-guide" onclick="switchTab('guide', this)" class="nav-btn w-full flex items-center gap-4 p-4 rounded-2xl transition-all font-bold text-sm text-blue-400 text-left">
-                    <i class="fas fa-book-open"></i> Setup Guide
-                </button>
-            </nav>
-
-            <div class="mt-auto pt-8 border-t border-white/5">
-                <button onclick="showManualModal()" class="w-full mb-4 bg-emerald-500/10 text-emerald-500 p-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all text-left">
-                    <i class="fas fa-plus-circle mr-2"></i> Manual Voucher
-                </button>
-                <button onclick="location.reload()" class="w-full text-slate-500 hover:text-white p-2 text-xs font-bold uppercase tracking-widest">Logout</button>
+            <div class="md:hidden font-bold text-slate-800" id="headerIspNameMob">Dashboard</div>
+            <div class="flex items-center gap-2 md:gap-4">
+                <button class="hidden md:flex items-center gap-2 px-4 py-1.5 border border-slate-300 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-50 transition">Start Free Trial</button>
+                <div class="w-px h-6 bg-slate-200 hidden md:block"></div>
+                
+                <div class="relative flex items-center">
+                    <button onclick="toggleNotifications(event)" class="relative p-2 text-slate-400 hover:text-slate-600 transition">
+                        <i class="far fa-bell text-lg"></i>
+                        <span id="bellBadge" class="hidden absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                    </button>
+                    <div id="notificationDropdown" class="hidden absolute right-0 top-full mt-2 w-screen max-w-[calc(100vw-2rem)] md:max-w-sm bg-white rounded-xl shadow-xl border border-slate-100 z-[150] overflow-hidden -mr-2 md:mr-0">
+                        <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <h4 class="font-bold text-slate-800 text-sm">System Alerts</h4>
+                            <button onclick="clearAlerts()" class="text-[10px] text-blue-600 font-bold hover:underline">Mark all read</button>
+                        </div>
+                        <div class="max-h-80 overflow-y-auto" id="alertList">
+                            <div class="p-8 text-center text-slate-400 text-sm"><i class="fas fa-check-circle text-green-400 text-2xl mb-2 block"></i>All systems operational.</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="flex-1 p-6 md:p-10 overflow-y-auto">
-            
-            <div id="dashboardTab" class="tab-content active">
-                <div class="flex justify-between items-end mb-10">
+        <div class="flex-1 overflow-y-auto bg-slate-50/50 p-4 md:p-8" onclick="closeDropdowns()">
+            <div id="statusAlert" class="fixed top-6 right-6 z-[300] px-6 py-3 rounded-2xl text-sm font-black text-white shadow-2xl transition-all transform translate-y-0 hidden"></div>
+
+            <div id="dashboardTab" class="tab-content active max-w-7xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <h2 class="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">ISP Overview</h2>
+                    
+                    <select id="dashboardTimeFilter" onchange="applyDashboardFilter()" class="bg-white border border-slate-200 text-slate-600 font-bold text-xs py-2.5 px-4 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer uppercase tracking-wider">
+                        <option value="7">Last 7 Days</option>
+                        <option value="30">Last 30 Days</option>
+                        <option value="all" selected>All Time</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Total Revenue</p>
+                        <h3 id="totalSales" class="text-2xl md:text-3xl font-black text-blue-600 mt-1">KES 0</h3>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-l-green-500 hover:shadow-md transition">
+                        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Net Profit</p>
+                        <h3 id="netProfit" class="text-2xl md:text-3xl font-black text-green-600 mt-1">KES 0</h3>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Active Users</p>
+                        <h3 id="activeUsers" class="text-2xl md:text-3xl font-black text-slate-800 mt-1">0</h3>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Total Txns</p>
+                        <h3 id="totalCount" class="text-2xl md:text-3xl font-black text-slate-800 mt-1">0</h3>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-widest">Revenue Trend</h4>
+                        <div class="chart-cage flex-1 min-h-[250px]">
+                            <canvas id="revenueBarChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-widest">Sales by Package</h4>
+                        <div class="chart-cage flex-1 min-h-[200px]">
+                            <canvas id="pkgChart"></canvas>
+                        </div>
+                        <div class="mt-4 text-center border-t border-slate-50 pt-4">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Top Performer</p>
+                            <p id="popularPkg" class="text-sm font-black text-blue-600 mt-1">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <h4 class="font-bold mb-4 text-slate-600 uppercase text-xs tracking-widest">Live Activity Feed</h4>
+                        <div id="activityFeed" class="space-y-3 h-64 overflow-y-auto pr-2 hide-scrollbar"></div>
+                    </div>
+                    
+                    <div class="lg:col-span-2 bg-white p-8 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center items-center relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-gradient-to-br from-blue-600 to-teal-400 opacity-95"></div>
+                        <div class="relative z-10 text-center text-white">
+                            <i class="fas fa-rocket text-5xl mb-4 opacity-80 group-hover:-translate-y-2 transition-transform duration-300"></i>
+                            <h3 class="text-2xl font-black mb-2">Ready to Scale?</h3>
+                            <p class="text-blue-100 text-sm mb-6 max-w-md mx-auto">Generate manual vouchers instantly or connect a new router to your billing engine.</p>
+                            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                                <button onclick="showManualModal()" class="px-6 py-3 bg-white text-blue-600 font-black rounded-xl shadow-lg hover:bg-slate-50 transition uppercase tracking-widest text-[10px] border border-transparent">Gen Voucher</button>
+                                <button onclick="switchTab('mikrotik')" class="px-6 py-3 bg-blue-700/50 border border-blue-400 text-white font-black rounded-xl shadow-lg hover:bg-blue-800/50 transition uppercase tracking-widest text-[10px] backdrop-blur-sm">Add Router</button>
+                            </div>
+                        </div>
+                        <div class="absolute top-[-50px] right-[-50px] w-48 h-48 bg-white rounded-full opacity-10 blur-2xl"></div>
+                        <div class="absolute bottom-[-50px] left-[-50px] w-56 h-56 bg-teal-300 rounded-full opacity-20 blur-3xl"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="usersTab" class="tab-content max-w-7xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between md:items-end gap-4 mb-6">
                     <div>
-                        <h2 class="text-3xl font-black text-slate-900 tracking-tight">Performance Hub</h2>
-                        <p class="text-slate-500 text-sm">Stats for <span id="ispDisplayName" class="font-bold text-blue-600">...</span></p>
+                        <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Active Users</h2>
+                        <p class="text-sm text-slate-500 mt-1">Manage Hotspot and PPPoE clients on your network.</p>
                     </div>
-                    <div class="bg-blue-600/10 px-4 py-2 rounded-xl text-blue-600 text-xs font-bold uppercase">Live</div>
-                </div>
-
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-                    <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
-                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Total Revenue</p>
-                        <h3 id="totalSales" class="text-2xl font-black text-slate-900">KES 0</h3>
-                    </div>
-                    <div class="bg-white p-6 rounded-[2rem] shadow-sm border-l-4 border-emerald-500">
-                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Income Today</p>
-                        <h3 id="incomeToday" class="text-2xl font-black text-emerald-600">KES 0</h3>
-                    </div>
-                    <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
-                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Active Users</p>
-                        <h3 id="activeUsers" class="text-2xl font-black text-slate-900">0</h3>
-                    </div>
-                    <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hidden md:block">
-                        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Status</p>
-                        <h3 class="text-xs font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2"><span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> Online</h3>
+                    <div class="flex gap-3">
+                        <button class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-700 hover:bg-slate-50 shadow-sm flex items-center gap-2 transition">
+                            <i class="fas fa-cloud-download-alt text-slate-400"></i> Import
+                        </button>
+                        <button onclick="showManualModal()" class="px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-bold text-white hover:bg-blue-700 shadow-sm shadow-blue-200 flex items-center gap-2 transition">
+                            <i class="fas fa-plus"></i> Create User
+                        </button>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-                    <div class="lg:col-span-2 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
-                        <h4 class="text-xs font-black text-slate-400 uppercase mb-8 tracking-widest">Growth</h4>
-                        <div class="chart-cage"><canvas id="pkgChart"></canvas></div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="flex border-b border-slate-200 overflow-x-auto hide-scrollbar">
+                        <div onclick="filterUserView('All')" id="tab-all" class="table-tab active whitespace-nowrap">All <span id="count-all" class="tab-badge">0</span></div>
+                        <div onclick="filterUserView('Hotspot')" id="tab-hotspot" class="table-tab whitespace-nowrap">Hotspot <span id="count-hotspot" class="tab-badge">0</span></div>
+                        <div onclick="filterUserView('PPPoE')" id="tab-pppoe" class="table-tab whitespace-nowrap">PPPoE <span id="count-pppoe" class="tab-badge">0</span></div>
+                        <div onclick="filterUserView('Paused')" id="tab-paused" class="table-tab whitespace-nowrap">Paused <span id="count-paused" class="tab-badge">0</span></div>
                     </div>
-                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
-                        <h4 class="text-xs font-black text-slate-400 uppercase mb-8 tracking-widest">Recent Activity</h4>
-                        <div id="activityFeed" class="space-y-4"></div>
-                    </div>
-                </div>
 
-                <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
-                    <div class="p-6 border-b flex justify-between items-center">
-                        <h4 class="font-black text-slate-900 text-sm uppercase">Users</h4>
-                        <input type="text" onkeyup="filterTable('adminTableBody')" placeholder="Search..." class="p-3 border rounded-xl text-xs outline-none focus:ring-4 focus:ring-blue-500/10 w-48">
+                    <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                        <div class="relative w-full md:w-72">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <input type="text" id="userSearch" onkeyup="filterTable('userTableBody', 'userSearch')" placeholder="Search users by name, phone or code..." 
+                                   class="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <button onclick="fetchAdminData()" class="ml-2 p-1.5 text-slate-500 border border-slate-300 rounded-md bg-white hover:bg-slate-50" title="Refresh Data"><i class="fas fa-sync-alt text-xs"></i></button>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse min-w-[600px]">
-                            <thead class="bg-slate-50 border-b text-[10px] font-black text-slate-500 uppercase tracking-widest">
+
+                    <div class="overflow-x-auto min-h-[400px]">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead class="bg-slate-50 border-b border-slate-200">
                                 <tr>
-                                    <th class="p-6">Client</th><th class="p-6">Plan</th><th class="p-6 text-center">Voucher</th><th class="p-6">Status</th><th class="p-6 text-right">Actions</th>
+                                    <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">User details</th>
+                                    <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Package</th>
+                                    <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Network Info</th>
+                                    <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                                    <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="adminTableBody"></tbody>
+                            <tbody id="userTableBody" class="divide-y divide-slate-100">
+                                <tr><td colspan="5" class="text-center py-10 text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i> Loading users...</td></tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <div id="packagesTab" class="tab-content">
-                <div class="flex justify-between items-center mb-10">
-                    <h2 class="text-3xl font-black text-slate-900 tracking-tight">Plans</h2>
-                    <button onclick="showPackageModal()" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg">New Plan</button>
+            <div id="expiryTab" class="tab-content max-w-7xl mx-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Expiry Management</h2>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="packageGrid"></div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden min-h-[400px]">
+                    <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                        <div class="relative w-full md:w-72">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <input type="text" id="expirySearch" onkeyup="filterTable('expiryTableBody', 'expirySearch')" placeholder="Search user phone..." 
+                                   class="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead class="bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                    <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">User / Phone</th>
+                                    <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Plan</th>
+                                    <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Expiry Date & Time</th>
+                                    <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                                    <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expiryTableBody" class="divide-y divide-slate-100">
+                                <tr><td colspan="5" class="text-center py-10 text-slate-400">Loading expiry data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
-            <div id="transactionsTab" class="tab-content">
-                <h2 class="text-3xl font-black text-slate-900 mb-10 tracking-tight">History</h2>
-                <div class="bg-white rounded-[2.5rem] shadow-sm border overflow-hidden">
-                    <table class="w-full text-left">
-                        <thead class="bg-slate-50 border-b text-[10px] uppercase text-slate-500 font-black">
-                            <tr><th class="p-6">Date</th><th class="p-6">Phone</th><th class="p-6">Plan</th><th class="p-6">Amount</th><th class="p-6">Code</th></tr>
-                        </thead>
-                        <tbody id="fullHistoryBody"></tbody>
-                    </table>
+            <div id="bindingsTab" class="tab-content max-w-7xl mx-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-900 tracking-tight">IP & MAC Bindings</h2>
+                        <p class="text-sm text-slate-500 mt-1">Bypass hotspot authentication for smart TVs, routers, or admin devices.</p>
+                    </div>
+                    <button onclick="showBindingModal()" class="px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-bold text-white hover:bg-blue-700 shadow-sm shadow-blue-200 flex items-center gap-2 transition">
+                        <i class="fas fa-plus"></i> Add Binding
+                    </button>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden min-h-[400px]">
+                    <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                        <div class="relative w-full md:w-72">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <input type="text" id="bindingSearch" onkeyup="filterTable('bindingsTableBody', 'bindingSearch')" placeholder="Search MAC or Name..." 
+                                   class="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead class="bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                    <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Device Info</th>
+                                    <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">MAC Address</th>
+                                    <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">IP Address</th>
+                                    <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                                    <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bindingsTableBody" class="divide-y divide-slate-100">
+                                <tr><td colspan="5" class="text-center py-10 text-slate-400">Loading bindings...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="packagesTab" class="tab-content max-w-7xl mx-auto">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Manage Packages</h2>
+                    <button onclick="showPackageModal()" class="px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-bold text-white hover:bg-blue-700 shadow-sm shadow-blue-200 flex items-center gap-2 transition">
+                        <i class="fas fa-plus"></i> Add New Package
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="packageGrid"></div>
+            </div>
+            
+            <div id="transactionsTab" class="tab-content max-w-7xl mx-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Recent Payments</h2>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden min-h-[400px]">
+                    <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                        <div class="relative w-full md:w-72">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <input type="text" id="txnSearch" onkeyup="filterTable('txnsTableBody', 'txnSearch')" placeholder="Search reference or phone..." 
+                                   class="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead class="bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                    <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Date & Time</th>
+                                    <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Ref Code</th>
+                                    <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Phone Number</th>
+                                    <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Package</th>
+                                    <th class="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Amount (KES)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="txnsTableBody" class="divide-y divide-slate-100">
+                                <tr><td colspan="5" class="text-center py-10 text-slate-400">Loading transactions...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <div id="billingTab" class="tab-content">
-                <h2 class="text-3xl font-black text-slate-900 mb-10 tracking-tight">Platform Billing</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-                    <div class="bg-slate-900 text-white p-10 rounded-[2.5rem] shadow-xl relative overflow-hidden">
-                        <div class="relative z-10">
-                            <p class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Total Commission Owed</p>
-                            <h3 id="owedAmount" class="text-5xl font-black mb-6">KES 0.00</h3>
-                            <div class="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase">
-                                <i class="fas fa-check-circle"></i> System Active
+            <div id="mikrotikTab" class="tab-content max-w-6xl mx-auto">
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-900 mb-8 tracking-tight">MikroTik Configuration</h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="space-y-6">
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+                            <h3 class="text-lg font-bold text-slate-900 mb-6">Connection Details</h3>
+                            
+                            <div class="space-y-5">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 tracking-widest">Cloud DNS / IP</label>
+                                    <input type="text" id="setRouterIp" placeholder="xxxxxx.sn.mynetname.net" class="w-full p-4 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition text-sm font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 tracking-widest">API Username</label>
+                                    <input type="text" id="setRouterUser" placeholder="" class="w-full p-4 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 tracking-widest">API Password</label>
+                                    <input type="password" id="setRouterPass" placeholder="••••••••" class="w-full p-4 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition tracking-widest text-sm">
+                                </div>
+                            </div>
+
+                            <div class="mt-8 space-y-3">
+                                <button onclick="saveMikrotikSettings()" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-xl font-bold transition-all shadow-lg text-sm">
+                                    Save & Generate Script
+                                </button>
+                                <button onclick="testMikrotikConnection()" class="w-full bg-blue-50 text-blue-600 hover:bg-blue-100 py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 text-sm border border-blue-100">
+                                    <i class="fas fa-plug"></i> Test Connection
+                                </button>
                             </div>
                         </div>
-                        <i class="fas fa-bolt absolute -right-10 -bottom-10 text-[12rem] text-white/5 rotate-12"></i>
-                    </div>
-                    <div class="bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm">
-                        <h4 class="font-black text-slate-900 text-sm uppercase mb-6">Clear Commission</h4>
-                        <div class="space-y-4">
-                            <div class="relative">
-                                <span class="absolute left-5 top-1/2 -translate-y-1/2 font-black text-slate-300">+254</span>
-                                <input type="tel" id="billingPhone" placeholder="712345678" 
-                                       class="w-full pl-16 pr-6 py-5 border border-slate-100 rounded-2xl font-bold bg-slate-50 outline-none focus:ring-4 focus:ring-blue-500/10">
+
+                        <div class="bg-transparent border-none p-0 mt-4">
+                            <h3 class="text-[10px] font-bold text-slate-500 uppercase mb-3 tracking-widest">Manual Remote Access</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <button class="bg-white border border-slate-200 rounded-xl p-4 flex flex-col items-center justify-center gap-2 hover:shadow-md transition group">
+                                    <i class="fas fa-desktop text-2xl text-slate-400 group-hover:text-blue-600 transition"></i>
+                                    <span class="text-[10px] font-bold text-slate-600 uppercase tracking-widest group-hover:text-slate-900 transition">Winbox</span>
+                                </button>
+                                <button class="bg-white border border-slate-200 rounded-xl p-4 flex flex-col items-center justify-center gap-2 hover:shadow-md transition group">
+                                    <i class="fas fa-globe text-2xl text-slate-400 group-hover:text-blue-600 transition"></i>
+                                    <span class="text-[10px] font-bold text-slate-600 uppercase tracking-widest group-hover:text-slate-900 transition">Webfig</span>
+                                </button>
                             </div>
-                            <button onclick="payPlatformCommission()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-blue-600/20">
-                                Pay Now via M-Pesa
+                        </div>
+                    </div>
+
+                    <div class="bg-[#0f172a] rounded-3xl shadow-2xl p-6 border border-slate-800 flex flex-col min-h-[500px] relative overflow-hidden">
+                        <div class="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">RouterOS Script</span>
+                            <button onclick="copyRosScript()" class="text-xs font-bold text-slate-400 hover:text-white transition flex items-center gap-2 bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700">
+                                <i class="far fa-copy"></i> Copy
                             </button>
                         </div>
-                    </div>
-                </div>
-                <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
-                    <div class="p-6 border-b"><h4 class="font-black text-slate-900 text-xs uppercase tracking-widest">Commission Log (5%)</h4></div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left">
-                            <thead class="bg-slate-50 text-[10px] font-black text-slate-500 uppercase">
-                                <tr><th class="p-6">Date</th><th class="p-6">Customer Sale</th><th class="p-6 text-blue-600">Veltrix Cut</th><th class="p-6 text-right">Status</th></tr>
-                            </thead>
-                            <tbody id="billingTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div id="mikrotikTab" class="tab-content">
-                <h2 class="text-3xl font-black text-slate-900 mb-10 tracking-tight">MikroTik Connectivity</h2>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100">
-                        <div class="space-y-6">
-                            <div><label class="text-[10px] font-black uppercase text-slate-400">Cloud DNS Name</label><input type="text" id="mt_dns" placeholder="xxxx.mynetname.net" class="w-full p-4 border rounded-2xl mt-2 outline-none focus:ring-2 focus:ring-blue-500"></div>
-                            <div><label class="text-[10px] font-black uppercase text-slate-400">Router DNS (Optional)</label><input type="text" id="mt_local_dns" placeholder="veltrix.wifi" class="w-full p-4 border rounded-2xl mt-2 outline-none focus:ring-2 focus:ring-blue-500"></div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div><label class="text-[10px] font-black uppercase text-slate-400">Username</label><input type="text" id="mt_user" value="veltrix_api" class="w-full p-4 border rounded-2xl mt-2"></div>
-                                <div><label class="text-[10px] font-black uppercase text-slate-400">Password</label><input type="password" id="mt_pass" value="veltrix123" class="w-full p-4 border rounded-2xl mt-2"></div>
-                            </div>
-                            <button onclick="saveAndGenerateScript()" class="w-full bg-slate-900 text-white p-5 rounded-2xl font-black text-[10px] uppercase shadow-xl">Generate Full Config</button>
+                        <div class="flex-1 overflow-y-auto font-mono text-sm hide-scrollbar">
+                            <pre id="rosScriptOutput" class="text-emerald-400 whitespace-pre-wrap leading-relaxed"># Fill connection details and save to view script...</pre>
                         </div>
                     </div>
-                    <div class="bg-slate-950 p-10 rounded-[2.5rem] font-mono text-[10px] text-emerald-400 relative overflow-hidden group">
-                        <button onclick="copyToClipboard()" class="absolute top-6 right-6 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white px-4 py-2 rounded-xl border border-emerald-500/20 transition-all font-black text-[10px] uppercase tracking-widest flex items-center gap-2">
-                            <i class="fas fa-copy"></i> <span id="copyBtnText">Copy Code</span>
+                </div>
+            </div>
+
+            <div id="apisettingsTab" class="tab-content max-w-4xl mx-auto">
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-900 mb-8 tracking-tight">System & API Settings</h2>
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <div class="md:col-span-2 mb-2 border-b border-slate-100 pb-2">
+                            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-building text-blue-500"></i> General Settings</h3>
+                        </div>
+                        
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2 tracking-wide">ISP Name</label>
+                            <input type="text" id="setIspName" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2 tracking-wide">MikroTik DNS Name</label>
+                            <input type="text" id="setDns" placeholder="e.g. hotspot.veltrix.net" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2 tracking-wide">Support Phone Number</label>
+                            <input type="text" id="setPhone" placeholder="07XX XXX XXX" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition">
+                        </div>
+
+                        <div class="md:col-span-2 mt-4 mb-2 border-b border-slate-100 pb-2">
+                            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-wallet text-blue-500"></i> PayHero M-Pesa Integration</h3>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2 tracking-wide">PayHero Channel ID</label>
+                            <input type="text" id="setChannel" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition font-mono text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2 tracking-wide">Basic Auth Token</label>
+                            <input type="password" id="setAuth" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition tracking-widest">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-10 flex justify-end">
+                        <button onclick="saveSystemSettings()" class="px-8 py-4 bg-blue-600 text-white rounded-xl font-black uppercase tracking-widest hover:bg-blue-700 transition shadow-lg shadow-blue-200 flex items-center gap-2 text-sm">
+                            <i class="fas fa-save"></i> Save Settings
                         </button>
-                        <pre id="mt_script_output" class="whitespace-pre-wrap leading-relaxed pt-8"># Enter Cloud DNS and click generate...</pre>
                     </div>
                 </div>
             </div>
 
-            <div id="guideTab" class="tab-content">
-                <h2 class="text-2xl md:text-3xl font-bold mb-8 text-slate-900">Setup Guide</h2>
-                <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 max-w-4xl">
-                    <div class="guide-step"><h3 class="font-black text-blue-600">Phase 1: First Login</h3><p class="text-sm">Internet In to Port 1. Computer to Port 2. Use WinBox, login: admin.</p></div>
-                    <div class="guide-step"><h3 class="font-black text-blue-600">Phase 2: Internet</h3><p class="text-sm">IP > DHCP Client > Select ether1. Add DNS 8.8.8.8.</p></div>
-                    <div class="guide-step"><h3 class="font-black text-blue-600">Phase 3: Hotspot</h3><p class="text-sm">Bridge ether2 and wlan1. Hotspot Setup on bridge1. DNS: veltrix.wifi.</p></div>
-                    <div class="guide-step"><h3 class="font-black text-blue-600">Phase 4: Linking</h3><p class="text-sm">Enable api (8728). Paste script from MikroTik tab to terminal.</p></div>
+            <div id="portalTab" class="tab-content max-w-6xl mx-auto">
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-900 mb-8 tracking-tight">Portal Customization</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 space-y-6 h-fit">
+                        <h3 class="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-2">Brand Identity</h3>
+                        
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 tracking-widest">Portal Title</label>
+                            <input type="text" id="setPortalTitle" placeholder="e.g. Smartech ISP" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition text-sm" oninput="updatePortalPreview()">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 tracking-widest">Logo URL (Optional)</label>
+                            <input type="url" id="setPortalLogo" placeholder="https://example.com/logo.png" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition text-sm" oninput="updatePortalPreview()">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 tracking-widest">Brand Theme Color</label>
+                            <div class="flex items-center gap-4">
+                                <input type="color" id="setPortalColor" value="#2563eb" class="h-14 w-14 rounded-xl cursor-pointer border-0 bg-transparent p-0" oninput="document.getElementById('setPortalColorText').value = this.value; updatePortalPreview();">
+                                <input type="text" id="setPortalColorText" value="#2563eb" class="flex-1 p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 transition text-sm font-mono uppercase" oninput="document.getElementById('setPortalColor').value = this.value; updatePortalPreview();">
+                            </div>
+                        </div>
+
+                        <button onclick="savePortalSettings()" class="w-full mt-8 bg-blue-600 text-white py-4 rounded-xl font-bold uppercase tracking-widest shadow-lg shadow-blue-200 hover:bg-blue-700 transition flex items-center justify-center gap-2 text-sm">
+                            <i class="fas fa-save"></i> Save Appearance
+                        </button>
+                    </div>
+
+                    <div class="flex justify-center items-center bg-slate-100 rounded-3xl p-8 border border-slate-200">
+                        <div class="relative w-[320px] h-[650px] bg-slate-900 rounded-[3rem] border-[8px] border-slate-900 shadow-2xl overflow-hidden shadow-slate-300">
+                            <div class="absolute top-0 inset-x-0 h-5 bg-slate-900 rounded-b-2xl w-32 mx-auto z-20"></div>
+                            <iframe id="portalPreviewIframe" src="portal.html" class="w-full h-full bg-white border-0" title="Portal Preview"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="guideTab" class="tab-content max-w-5xl mx-auto">
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-900 mb-8 tracking-tight">System Setup Guide</h2>
+                
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+                    <div class="space-y-8 text-sm">
+                        <div>
+                            <h3 class="text-blue-600 font-black uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fas fa-network-wired"></i> Phase 1: Physical Setup & First Login</h3>
+                            <div class="pl-6 border-l-2 border-slate-100 space-y-2">
+                                <p><strong class="text-slate-800">Hardware:</strong> Internet In to Port 1. Computer to Port 2.</p>
+                                <p><strong class="text-slate-800">Login:</strong> Use WinBox, click Neighbors tab, login: admin / no password.</p>
+                                <p><strong class="text-slate-800">Reset:</strong> Click Remove Configuration upon first login.</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-blue-600 font-black uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fas fa-globe"></i> Phase 2: Connecting to the Internet</h3>
+                            <div class="pl-6 border-l-2 border-slate-100 space-y-2">
+                                <p><strong class="text-slate-800">WAN:</strong> IP > DHCP Client > [+], select ether1.</p>
+                                <p><strong class="text-slate-800">Routes:</strong> IP > Routes > [+], set Gateway IP.</p>
+                                <p><strong class="text-slate-800">DNS:</strong> IP > DNS, add 8.8.8.8 and 8.8.4.4. Allow Remote Requests.</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-blue-600 font-black uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fas fa-wifi"></i> Phase 3: Creating the Hotspot Network</h3>
+                            <div class="pl-6 border-l-2 border-slate-100 space-y-2">
+                                <p><strong class="text-slate-800">Bridge:</strong> Bridge > [+] name: bridge1. Add ether2 and wlan1 to ports.</p>
+                                <p><strong class="text-slate-800">Wizard:</strong> IP > Hotspot > Hotspot Setup. Select bridge1. Set DNS Name: <strong class="text-slate-900 bg-slate-100 px-2 py-0.5 rounded">snookum.wifi</strong>.</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-blue-600 font-black uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fas fa-link"></i> Phase 4: Linking the Billing System</h3>
+                            <div class="pl-6 border-l-2 border-slate-100 space-y-2">
+                                <p><strong class="text-slate-800">Enable API:</strong> IP > Services > Enable api (8728).</p>
+                                <p><strong class="text-slate-800">Terminal:</strong> Go to the <a href="#" onclick="switchTab('mikrotik')" class="text-blue-500 hover:underline font-bold">MikroTik Tab</a>, generate your RouterOS script, and paste it into a New Terminal in WinBox.</p>
+                                <p><strong class="text-slate-800">Radius:</strong> In Hotspot Profile, Login tab: check PAP only. Radius tab: check Use Radius.</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-blue-600 font-black uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fas fa-file-upload"></i> Phase 5: Uploading Portal Files</h3>
+                            <div class="pl-6 border-l-2 border-slate-100 space-y-4">
+                                <p><strong class="text-slate-800">Files:</strong> Open Files in WinBox. Find the <code class="bg-slate-100 text-slate-800 px-1 rounded">hotspot</code> folder.</p>
+                                <p><strong class="text-slate-800">Backup:</strong> Rename original <code class="bg-slate-100 text-slate-800 px-1 rounded">login.html</code> to <code class="bg-slate-100 text-slate-800 px-1 rounded">login_backup.html</code>.</p>
+                                <p><strong class="text-slate-800">Upload:</strong> Download your custom redirect file below, and drag it into the MikroTik hotspot folder.</p>
+                                
+                                <button onclick="downloadLoginHtml()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-blue-200 transition flex items-center gap-2 text-sm mt-2 w-fit">
+                                    <i class="fas fa-download"></i> Download login.html
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 bg-blue-50 border border-blue-100 rounded-xl p-5 flex items-start gap-4">
+                            <i class="fas fa-info-circle text-blue-500 text-xl mt-0.5"></i>
+                            <p class="text-blue-800 text-sm font-medium"><strong class="font-black">Verification:</strong> Connect phone to Wi-Fi. The portal should pop up automatically and redirect to your branded Veltrix billing page. If not, check your DNS settings and active data connection.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="manualModal" class="fixed inset-0 bg-slate-900/60 hidden z-[250] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-black">New Voucher</h2>
+                <button onclick="hideManualModal()"><i class="fas fa-times text-slate-400 hover:text-slate-600 text-lg"></i></button>
+            </div>
+            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Select Package</label>
+            <select id="mPkg" class="w-full p-4 border border-slate-200 rounded-xl mb-4 bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500 font-medium"></select>
+            
+            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Customer Phone (Optional)</label>
+            <input type="text" id="mPhone" placeholder="07XX XXX XXX" class="w-full p-4 border border-slate-200 rounded-xl mb-8 outline-none focus:ring-2 focus:ring-blue-500">
+            
+            <button onclick="generateManual()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl font-bold shadow-lg shadow-blue-200 transition uppercase tracking-widest text-sm">Generate Code</button>
+        </div>
+    </div>
+
+    <div id="successModal" class="fixed inset-0 bg-slate-900/80 hidden z-[300] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center">
+            <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl animate-bounce border-4 border-white shadow-sm">
+                <i class="fas fa-check"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-1 text-slate-900">Voucher Ready!</h3>
+            <div class="bg-slate-50 border border-slate-100 p-4 rounded-2xl mb-6 mt-4 shadow-inner">
+                <p id="displayCode" class="text-4xl font-black text-blue-600 tracking-widest mb-2">------</p>
+                <p id="displayExpiry" class="text-[10px] text-slate-400 font-mono uppercase"></p>
+            </div>
+            <button onclick="closeSuccessModal()" class="w-full bg-slate-900 hover:bg-slate-800 text-white p-4 rounded-xl font-bold transition uppercase tracking-widest text-sm">Done</button>
+        </div>
+    </div>
+
+    <div id="pkgModal" class="fixed inset-0 bg-slate-900/60 hidden z-[250] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md">
+            <h2 class="text-2xl font-black mb-6 text-slate-900">Create Package</h2>
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Package Name</label>
+                    <input type="text" id="newPkgName" placeholder="e.g. 1 Hour Unlimited" class="w-full p-4 border border-slate-200 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Price (KES)</label>
+                        <input type="number" id="newPkgPrice" placeholder="20" class="w-full p-4 border border-slate-200 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Duration (Mins)</label>
+                        <input type="number" id="newPkgDuration" placeholder="60" class="w-full p-4 border border-slate-200 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button onclick="hidePackageModal()" class="flex-1 bg-slate-100 text-slate-700 hover:bg-slate-200 p-4 rounded-xl font-bold transition uppercase tracking-wider text-xs">Cancel</button>
+                    <button onclick="addPackage()" class="flex-1 bg-blue-600 text-white hover:bg-blue-700 p-4 rounded-xl font-bold shadow-lg transition uppercase tracking-wider text-xs">Add Package</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="pkgModal" class="fixed inset-0 bg-slate-950/80 hidden z-[250] flex items-center justify-center p-4">
-        <div class="bg-white p-10 rounded-[2.5rem] w-full max-w-md">
-            <h2 class="text-2xl font-black mb-6">Create Plan</h2>
-            <div class="space-y-4">
-                <input type="text" id="newPkgName" placeholder="Name" class="w-full p-4 border rounded-2xl">
-                <input type="number" id="newPkgPrice" placeholder="Price KES" class="w-full p-4 border rounded-2xl">
-                <input type="number" id="newPkgDuration" placeholder="Duration (Mins)" class="w-full p-4 border rounded-2xl">
-                <div class="flex gap-3 pt-4"><button onclick="hidePackageModal()" class="flex-1 bg-slate-100 p-4 rounded-2xl font-bold">Cancel</button><button onclick="addPackage()" class="flex-1 bg-blue-600 text-white p-4 rounded-2xl font-bold">Add</button></div>
+    <div id="bindingModal" class="fixed inset-0 bg-slate-900/60 hidden z-[250] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md">
+            <h2 class="text-2xl font-black mb-6 text-slate-900">Add MAC Binding</h2>
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">MAC Address</label>
+                    <input type="text" id="newBindMac" placeholder="XX:XX:XX:XX:XX:XX" class="w-full p-4 border border-slate-200 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-mono tracking-widest text-sm uppercase">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">IP Address (Optional)</label>
+                    <input type="text" id="newBindIp" placeholder="10.0.0.X" class="w-full p-4 border border-slate-200 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-mono tracking-wider text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Device Name / Comment</label>
+                    <input type="text" id="newBindName" placeholder="e.g. Admin Laptop" class="w-full p-4 border border-slate-200 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button onclick="hideBindingModal()" class="flex-1 bg-slate-100 text-slate-700 hover:bg-slate-200 p-4 rounded-xl font-bold transition uppercase tracking-wider text-xs">Cancel</button>
+                    <button onclick="addBinding()" class="flex-1 bg-blue-600 text-white hover:bg-blue-700 p-4 rounded-xl font-bold shadow-lg transition uppercase tracking-wider text-xs">Add Binding</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <div id="manualModal" class="fixed inset-0 bg-slate-950/80 hidden z-[250] flex items-center justify-center p-4">
-        <div class="bg-white p-10 rounded-[2.5rem] w-full max-w-md">
-            <h2 class="text-xl font-black mb-8 uppercase">Manual Voucher</h2>
-            <select id="mPkg" class="w-full p-4 border rounded-2xl mb-4 bg-slate-50 font-bold text-sm"></select>
-            <input type="text" id="mPhone" placeholder="Phone Number" class="w-full p-4 border rounded-2xl mb-8 font-bold">
-            <button onclick="generateManual()" class="w-full bg-blue-600 text-white p-5 rounded-2xl font-black text-[10px] uppercase shadow-lg">Generate</button>
-            <button onclick="hideManualModal()" class="w-full mt-2 text-slate-400 text-[10px] font-bold">CLOSE</button>
+    <div id="confirmModal" class="fixed inset-0 bg-slate-900/70 hidden z-[300] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center transform transition-all">
+            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl border-4 border-white shadow-sm">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="text-xl font-black mb-2 text-slate-900">Confirm Deletion</h3>
+            <p class="text-slate-500 text-sm mb-8 leading-relaxed">This action cannot be undone. Are you sure you want to completely remove <span id="deleteItemDisplay" class="font-bold text-slate-800 px-1"></span>?</p>
+            <div class="flex gap-3">
+                <button onclick="closeConfirmModal()" class="flex-1 bg-slate-100 text-slate-700 p-4 rounded-xl font-bold hover:bg-slate-200 transition uppercase tracking-wider text-xs">Cancel</button>
+                <button onclick="executeDelete()" class="flex-1 bg-red-600 text-white p-4 rounded-xl font-bold shadow-lg shadow-red-200 hover:bg-red-700 transition uppercase tracking-wider text-xs">Delete</button>
+            </div>
         </div>
     </div>
 
-    <div id="successModal" class="fixed inset-0 bg-slate-950/90 hidden z-[300] flex items-center justify-center p-4 backdrop-blur-md">
-        <div class="bg-white p-10 rounded-[3rem] w-full max-w-sm text-center">
-            <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fas fa-check"></i></div>
-            <h3 class="text-xl font-bold mb-1 uppercase">Ready</h3>
-            <div class="bg-slate-50 p-6 rounded-[2rem] mb-6"><p id="displayCode" class="text-4xl font-black text-blue-600 tracking-widest">------</p></div>
-            <button onclick="document.getElementById('successModal').classList.add('hidden')" class="w-full bg-slate-900 text-white p-4 rounded-2xl font-bold">Done</button>
-        </div>
-    </div>
-
-    <script>
-        const VCC_URL = 'https://script.google.com/macros/s/AKfycbyScqo1yxjjweBuoWYDE5NZzwMigsgn9dK-D4DKAWqNNLiIcQWLyEGW7gzy91ymSb4/exec';
-        let currentPartnerKey = "";
-        let chartInstance = null;
-
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('sidebar-hidden'); }
-
-        async function handleLogin() {
-            const key = document.getElementById('partnerKeyInput').value.trim();
-            const btn = document.getElementById('loginBtn');
-            const error = document.getElementById('loginError');
-            if(!key) return;
-            btn.innerText = "VERIFYING..."; btn.disabled = true; error.classList.add('hidden');
-            try {
-                const response = await fetch(`${VCC_URL}?action=getPartnerDashboard&partnerKey=${key}`);
-                const data = await response.json();
-                if(data.status === "success") {
-                    currentPartnerKey = key;
-                    document.getElementById('loginOverlay').classList.add('hidden');
-                    document.getElementById('mainDashboard').classList.remove('opacity-0', 'pointer-events-none');
-                    updateUI(data);
-                } else { error.innerText = "Invalid Key."; error.classList.remove('hidden'); }
-            } catch (e) { error.innerText = "Connection failure."; error.classList.remove('hidden'); }
-            btn.innerText = "ACCESS DASHBOARD"; btn.disabled = false;
-        }
-
-        function updateUI(data) {
-            document.getElementById('ispDisplayName').innerText = data.ispName;
-            document.getElementById('brandName').innerText = data.ispName;
-            document.getElementById('totalSales').innerText = `KES ${data.totalRevenue.toLocaleString()}`;
-            document.getElementById('incomeToday').innerText = `KES ${data.incomeToday.toLocaleString()}`;
-            document.getElementById('activeUsers').innerText = data.activeCount;
-
-            document.getElementById('adminTableBody').innerHTML = data.recentTransactions.map(t => `
-                <tr class="border-b hover:bg-slate-50 transition">
-                    <td class="p-6 font-bold text-sm">${t.phone}</td><td class="p-6 text-sm">${t.package}</td>
-                    <td class="p-6 text-center font-mono text-blue-600 font-black tracking-widest">${t.code}</td>
-                    <td class="p-6"><span class="px-2 py-1 rounded-full text-[9px] font-black uppercase ${t.status === 'Active' ? 'status-active' : 'status-expired'}">${t.status}</span></td>
-                    <td class="p-6 text-right space-x-2">
-                         <button onclick="adminAction('${t.code}', 'activate')" class="text-green-600"><i class="fas fa-play"></i></button>
-                         <button onclick="adminAction('${t.code}', 'deactivate')" class="text-red-400"><i class="fas fa-stop"></i></button>
-                    </td>
-                </tr>`).join('');
-
-            document.getElementById('fullHistoryBody').innerHTML = data.recentTransactions.map(t => `
-                <tr class="border-b text-xs">
-                    <td class="p-6 text-slate-400">${t.timestamp}</td><td class="p-6 font-bold">${t.phone}</td>
-                    <td class="p-6">${t.package}</td><td class="p-6 text-green-600 font-black">KES ${t.amount}</td>
-                    <td class="p-6 font-mono text-slate-400 uppercase">${t.code}</td>
-                </tr>`).join('');
-
-            document.getElementById('packageGrid').innerHTML = data.packages.map(p => `
-                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col justify-between">
-                    <div><h4 class="text-xl font-black">${p.name}</h4><p class="text-blue-600 font-bold mb-2">KES ${p.price}</p>
-                    <span class="text-[9px] bg-slate-100 px-2 py-1 rounded-lg uppercase font-bold text-slate-500">${p.duration} Mins</span></div>
-                    <button onclick="deletePackage('${p.name}')" class="mt-8 text-red-400 text-[10px] font-black uppercase tracking-widest">Delete Plan</button>
-                </div>`).join('');
-
-            document.getElementById('mPkg').innerHTML = data.packages.map(p => `<option value="${p.name}">${p.name} (KES ${p.price})</option>`).join('');
-
-            document.getElementById('activityFeed').innerHTML = data.recentTransactions.slice(0,5).map(t => `
-                <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl">
-                    <div><p class="text-[10px] font-black uppercase text-slate-400">${t.package}</p><p class="font-bold text-sm text-slate-900">${t.phone}</p></div>
-                    <div class="text-emerald-500 font-black text-sm">+ KES ${t.amount}</div>
-                </div>`).join('');
-
-            // BILLING LOGIC
-            let totalOwed = 0;
-            document.getElementById('billingTableBody').innerHTML = data.recentTransactions.map(t => {
-                const cut = (t.amount * 0.05).toFixed(2);
-                totalOwed += parseFloat(cut);
-                return `<tr class="border-b text-xs"><td class="p-6 text-slate-400">${t.timestamp}</td><td class="p-6 font-bold">KES ${t.amount}</td><td class="p-6 font-black text-blue-600">KES ${cut}</td><td class="p-6 text-right"><span class="px-2 py-1 bg-amber-100 text-amber-700 rounded-md text-[9px] font-black uppercase">Pending</span></td></tr>`;
-            }).join('');
-            document.getElementById('owedAmount').innerText = `KES ${totalOwed.toFixed(2)}`;
-
-            updateChart(data.packageStats || {});
-        }
-
-        async function refreshPartnerData() {
-            try {
-                const res = await fetch(`${VCC_URL}?action=getPartnerDashboard&partnerKey=${currentPartnerKey}`);
-                const data = await res.json();
-                if(data.status === "success") updateUI(data);
-            } catch (e) { console.error("Refresh failed"); }
-        }
-
-        function switchTab(tabId, el) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(tabId + 'Tab').classList.add('active');
-            if(el) el.classList.add('active');
-            if (window.innerWidth < 768) toggleSidebar();
-        }
-
-        async function addPackage() {
-            const payload = { action: "addPackage", partnerKey: currentPartnerKey, name: document.getElementById('newPkgName').value, price: document.getElementById('newPkgPrice').value, duration: document.getElementById('newPkgDuration').value };
-            try { await fetch(VCC_URL, { method: "POST", body: JSON.stringify(payload) }); hidePackageModal(); refreshPartnerData(); } catch (e) { console.error("Add failed"); }
-        }
-
-        async function deletePackage(name) {
-            if(!confirm(`Delete ${name}?`)) return;
-            try { await fetch(VCC_URL, { method: "POST", body: JSON.stringify({ action: "deletePackage", partnerKey: currentPartnerKey, name: name }) }); refreshPartnerData(); } catch (e) { console.error("Delete failed"); }
-        }
-
-        async function generateManual() {
-            const payload = { action: "generateManualVoucher", partnerKey: currentPartnerKey, package: document.getElementById('mPkg').value, phone: document.getElementById('mPhone').value || "ADMIN" };
-            try {
-                const res = await fetch(VCC_URL, { method: "POST", body: JSON.stringify(payload) });
-                const data = await res.json();
-                if(data.status === "success") { hideManualModal(); document.getElementById('displayCode').innerText = data.code; document.getElementById('successModal').classList.remove('hidden'); refreshPartnerData(); }
-            } catch (e) { console.error("Manual generate failed"); }
-        }
-
-        async function payPlatformCommission() {
-            const phone = document.getElementById('billingPhone').value;
-            const amountStr = document.getElementById('owedAmount').innerText.replace('KES ', '');
-            const amount = parseFloat(amountStr);
-            if(amount <= 0) return;
-            document.getElementById('owedAmount').innerText = "REQUESTING...";
-            await fetch(VCC_URL, { method: "POST", body: JSON.stringify({ action: "payVeltrix", partnerKey: currentPartnerKey, phone: phone, amount: amount }) });
-            setTimeout(refreshPartnerData, 5000);
-        }
-
-        async function adminAction(code, type) {
-            try { await fetch(VCC_URL, { method: "POST", body: JSON.stringify({ action: type, partnerKey: currentPartnerKey, code: code }) }); refreshPartnerData(); } catch (e) { console.error("Action failed"); }
-        }
-
-        function saveAndGenerateScript() {
-            const dns = document.getElementById('mt_dns').value;
-            const localDns = document.getElementById('mt_local_dns').value || "veltrix.wifi";
-            const user = document.getElementById('mt_user').value;
-            const pass = document.getElementById('mt_pass').value;
-            if(!dns) return;
-            document.getElementById('mt_script_output').innerText = `# MIKROTIK AUTO-CONFIG FOR ISP PORTAL\n# Generated for Cloud DNS: ${dns}\n# ==========================================\n\n# 1. CREATE API USER\n/user add name="${user}" group=full password="${pass}" comment="Billing API User"\n\n# 2. ENABLE API & SSL SERVICES\n/ip service set api disabled=no port=8728\n/ip service set api-ssl disabled=no port=8729\n/ip service set www-ssl disabled=no port=443\n/ip cloud set ddns-enabled=yes\n\n# 3. FIREWALL RULES\n/ip firewall filter add chain=input protocol=tcp dst-port=443 action=accept comment="Allow Billing API" place-before=0\n/ip firewall filter add chain=input protocol=tcp dst-port=8728 action=accept comment="Allow MikroTik API" place-before=0\n\n# 4. ANTI-TETHERING RULES\n/ip firewall mangle add chain=postrouting action=change-ttl new-ttl=set:1 passthrough=yes comment="Prevent Sharing"\n\n# 5. WALLED GARDEN\n/ip hotspot walled-garden\nadd dst-host="mrsnookum.github.io" action=allow\nadd dst-host="*.github.io" action=allow\nadd dst-host="veltrix-isp.top" action=allow\nadd dst-host="script.google.com" action=allow\nadd dst-host="*.google.com" action=allow\nadd dst-host="*.googleusercontent.com" action=allow\nadd dst-host="*.gstatic.com" action=allow\nadd dst-host="backend.payhero.co.ke" action=allow\nadd dst-host="*.payhero.co.ke" action=allow\n\n# 6. AUTHENTICATION\n/ip hotspot profile set [find default=yes] login-by=http-pap,mac dns-name="${localDns}"`;
-        }
-
-        function copyToClipboard() {
-            const scriptText = document.getElementById('mt_script_output').innerText;
-            const copyBtnText = document.getElementById('copyBtnText');
-            if (scriptText.includes("Enter Cloud DNS")) { copyBtnText.innerText = "NO SCRIPT!"; setTimeout(() => { copyBtnText.innerText = "Copy Code"; }, 2000); return; }
-            navigator.clipboard.writeText(scriptText).then(() => { copyBtnText.innerText = "COPIED!"; setTimeout(() => { copyBtnText.innerText = "Copy Code"; }, 3000); }).catch(err => { console.error('Failed to copy: ', err); });
-        }
-
-        function updateChart(stats) {
-            const ctx = document.getElementById('pkgChart').getContext('2d');
-            if(chartInstance) chartInstance.destroy();
-            const labels = Object.keys(stats).length ? Object.keys(stats) : ["No Sales"];
-            const data = Object.values(stats).length ? Object.values(stats) : [0];
-            chartInstance = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ data: data, backgroundColor: '#3b82f6', borderRadius: 12 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } } } });
-        }
-
-        function filterTable(id) {
-            const input = event.target.value.toUpperCase();
-            const rows = document.getElementById(id).getElementsByTagName("tr");
-            for (let i = 0; i < rows.length; i++) { rows[i].style.display = rows[i].innerText.toUpperCase().includes(input) ? "" : "none"; }
-        }
-
-        function showPackageModal() { document.getElementById('pkgModal').classList.remove('hidden'); }
-        function hidePackageModal() { document.getElementById('pkgModal').classList.add('hidden'); }
-        function showManualModal() { document.getElementById('manualModal').classList.remove('hidden'); }
-        function hideManualModal() { document.getElementById('manualModal').classList.add('hidden'); }
-    </script>
+    <script src="admin.js"></script>
 </body>
 </html>
