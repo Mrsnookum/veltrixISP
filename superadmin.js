@@ -118,8 +118,21 @@ function renderTable(tenantsData) {
             ? `<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded text-[10px] uppercase tracking-widest font-bold"><i class="fas fa-circle text-[8px] mr-1"></i> Active</span>`
             : `<span class="bg-red-500/10 text-red-400 border border-red-500/20 px-2.5 py-1 rounded text-[10px] uppercase tracking-widest font-bold"><i class="fas fa-lock text-[8px] mr-1"></i> Suspended</span>`;
         
-        // Simulated Router Health (Randomized based on ID for visual effect)
-        const isHealthy = isActive && (t.id.charCodeAt(t.id.length-1) % 5 !== 0); // 80% healthy if active
+        // Billing Info
+        let billDateStr = t.nextBilling || "Not Set";
+        let isPastDue = false;
+        if(billDateStr && billDateStr !== "Not Set") {
+            const billDate = new Date(billDateStr);
+            if(billDate < new Date() && isActive) isPastDue = true;
+        }
+        
+        const billHtml = `<div class="flex items-center gap-2">
+            <span class="font-mono text-xs ${isPastDue ? 'text-red-400 font-bold' : 'text-slate-300'}">${billDateStr}</span>
+            <button onclick="openBillingModal('${t.id}', '${t.name}')" class="text-slate-500 hover:text-purple-400 p-1 transition" title="Log Payment & Update Date"><i class="fas fa-edit text-xs"></i></button>
+        </div>`;
+
+        // Simulated Router Health
+        const isHealthy = isActive && (t.id.charCodeAt(t.id.length-1) % 5 !== 0); 
         let healthHtml = '';
         if (!isActive) {
             healthHtml = `<span class="text-slate-500 text-xs"><i class="fas fa-unlink mr-1"></i> Offline</span>`;
@@ -152,6 +165,7 @@ function renderTable(tenantsData) {
                 <p class="text-[10px] text-blue-400 mt-0.5">${t.subdomain}.veltrix.com</p>
             </td>
             <td class="p-4 font-mono">${healthHtml}</td>
+            <td class="p-4">${billHtml}</td>
             <td class="p-4">${statusBadge}</td>
             <td class="p-4 text-right space-x-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
                 <a href="${portalUrl}" target="_blank" class="inline-block text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 p-2 rounded transition" title="Remote Portal Access"><i class="fas fa-external-link-alt"></i></a>
@@ -331,12 +345,94 @@ async function executeToggle() {
             fetchData(); // Refresh table and charts
         } else {
             showToast(result.message || "Action Failed", "error");
-            btn.innerHTML = originalText;
-            btn.disabled = false;
         }
     } catch (e) { 
         showToast("Network Error during execution.", "error"); 
+    } finally {
+        // ALWAYS RESET BUTTON STATE
         btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
+// --- ADD TENANT LOGIC (PROVISIONING) ---
+function openAddTenantModal() { document.getElementById('addTenantModal').classList.remove('hidden'); }
+function closeAddTenantModal() { document.getElementById('addTenantModal').classList.add('hidden'); document.getElementById('addTenantForm').reset(); }
+
+document.getElementById('addTenantForm')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitTenantBtn');
+    const originalText = btn.innerText;
+    btn.innerHTML = `<i class="fas fa-circle-notch fa-spin mr-2"></i> PROVISIONING...`; 
+    btn.disabled = true;
+    
+    const payload = {
+        action: "superadminAddTenant", password: currentPass,
+        ispName: document.getElementById('newIspName').value,
+        subdomain: document.getElementById('newIspSubdomain').value.toLowerCase().replace(/[^a-z0-9]/g, ''),
+        adminEmail: document.getElementById('newIspEmail').value,
+        adminPassword: document.getElementById('newIspPassword').value
+    };
+
+    try {
+        const res = await fetch(APPS_SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
+        const result = await res.json();
+        if(result.status === "success") { 
+            showToast(`Instance ${payload.subdomain} created successfully!`, "success"); 
+            closeAddTenantModal(); 
+            fetchData(); 
+        } else { 
+            showToast(result.message, "error"); 
+        }
+    } catch (e) { 
+        showToast("Network Error", "error"); 
+    } finally {
+        // ALWAYS RESET BUTTON STATE
+        btn.innerHTML = originalText; 
+        btn.disabled = false;
+    }
+});
+
+// --- BILLING LOGIC ---
+let billingTenantId = null;
+function openBillingModal(id, name) {
+    billingTenantId = id;
+    document.getElementById('billingTenantName').innerText = name;
+    
+    // Set default value to 30 days from today
+    const d = new Date(); d.setDate(d.getDate() + 30);
+    document.getElementById('newBillingDate').value = d.toISOString().split('T')[0];
+    document.getElementById('billingModal').classList.remove('hidden');
+}
+function closeBillingModal() { document.getElementById('billingModal').classList.add('hidden'); billingTenantId = null; }
+
+async function submitBillingUpdate() {
+    const dateVal = document.getElementById('newBillingDate').value;
+    if(!dateVal || !billingTenantId) return;
+    
+    const [year, month, day] = dateVal.split('-'); // Format as MM/dd/yyyy for Google Sheets
+    const formattedDate = `${month}/${day}/${year}`;
+    
+    const btn = document.getElementById('submitBillingBtn');
+    const originalText = btn.innerText;
+    btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i>`; 
+    btn.disabled = true;
+
+    try {
+        const res = await fetch(APPS_SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "superadminUpdateBilling", tenantId: billingTenantId, newDate: formattedDate, password: currentPass }) });
+        const result = await res.json();
+        if(result.status === "success") { 
+            showToast(result.message, "success"); 
+            closeBillingModal(); 
+            fetchData(); 
+        } else { 
+            showToast(result.message, "error"); 
+        }
+    } catch (e) { 
+        showToast("Network Error", "error"); 
+    } finally {
+        // ALWAYS RESET BUTTON STATE
+        btn.innerHTML = originalText; 
         btn.disabled = false;
     }
 }
@@ -358,3 +454,15 @@ document.getElementById('refreshBtn')?.addEventListener('click', fetchData);
 // Attach event listeners for the modal buttons
 document.getElementById('closeModalBtn')?.addEventListener('click', closeModal);
 document.getElementById('modalConfirmBtn')?.addEventListener('click', executeToggle);
+
+// Attach event listeners for Add Tenant Modal
+document.getElementById('addTenantBtn')?.addEventListener('click', openAddTenantModal);
+document.getElementById('mobileAddBtn')?.addEventListener('click', openAddTenantModal);
+document.getElementById('closeAddTenantBtn')?.addEventListener('click', closeAddTenantModal);
+
+// Attach event listeners for Billing Modal
+document.getElementById('closeBillingModalBtn')?.addEventListener('click', closeBillingModal);
+document.getElementById('submitBillingBtn')?.addEventListener('click', submitBillingUpdate);
+
+// Attach event listener for search input
+document.getElementById('searchInput')?.addEventListener('keyup', filterTable);
