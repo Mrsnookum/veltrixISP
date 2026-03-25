@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wi-Fi Portal - Smartech ISP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Modern UI Polish */
+        .package-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 20px; border: 2px solid #f1f5f9; cursor: pointer; background: white; }
+        .package-card.selected { border-color: #2563eb; background-color: #eff6ff; transform: translateY(-4px); box-shadow: 0 12px 20px -8px rgba(37, 99, 235, 0.25); }
+        .btn-primary { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); transition: all 0.2s; }
+        .btn-primary:active { transform: scale(0.96); }
+
+        /* Animated Skeleton Loader for Packages */
+        .skeleton { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s infinite; }
+        @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* Smooth Professional Overlay Spinner */
+        .spinner-ring { border: 3px solid rgba(37, 99, 235, 0.1); border-top: 3px solid #2563eb; border-radius: 50%; width: 50px; height: 50px; animation: spin 0.8s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        input { font-size: 16px !important; } /* Fix iOS zoom */
+        .backdrop-blur-md { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        
+        html { scroll-behavior: smooth; }
+
+        /* Reconnection Tab Styles */
+        .reconnect-tab { cursor: pointer; padding: 10px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; border-bottom: 2px solid transparent; transition: all 0.3s; }
+        .reconnect-tab.active { color: #2563eb; border-bottom-color: #2563eb; }
+    </style>
+</head>
+<body class="bg-[#f8fafc] font-sans text-gray-800 antialiased pb-10">
+
+    <div id="processingOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[500] hidden flex items-center justify-center p-6 transition-all duration-300">
+        <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl max-w-sm w-full text-center">
+            <div class="relative w-20 h-20 mx-auto mb-6">
+                <div class="spinner-ring absolute inset-0"></div>
+                <div class="absolute inset-0 flex items-center justify-center text-blue-600">
+                    <i class="fas fa-bolt text-2xl animate-pulse"></i>
+                </div>
+            </div>
+            <h3 id="overlayTitle" class="text-xl font-black text-slate-900 mb-2">Connecting...</h3>
+            <p id="overlayMsg" class="text-slate-500 text-sm leading-relaxed">Please wait while we secure your connection.</p>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 py-6 md:py-12">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-black text-blue-900 mb-3 tracking-tighter uppercase" id="ispNameHeader">Wi-Fi Portal</h1>
+            <div class="inline-flex items-center px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase tracking-widest border border-emerald-100">
+                <span class="mr-2 h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                Secure Gateway Active
+            </div>
+        </div>
+
+        <div class="mb-12">
+            <div class="flex items-center justify-between mb-6 px-2">
+                <h2 class="text-lg font-black text-blue-900 uppercase tracking-tight">1. Choose Access Plan</h2>
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Step 1 of 3</span>
+            </div>
+            <div id="package-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-6 rounded-[20px] border border-slate-100 flex flex-col items-center gap-3">
+                    <div class="h-3 w-16 skeleton rounded-full"></div>
+                    <div class="h-6 w-24 skeleton rounded-lg"></div>
+                    <div class="h-8 w-full skeleton rounded-xl mt-2"></div>
+                </div>
+                <div class="bg-white p-6 rounded-[20px] border border-slate-100 flex flex-col items-center gap-3">
+                    <div class="h-3 w-16 skeleton rounded-full"></div>
+                    <div class="h-6 w-24 skeleton rounded-lg"></div>
+                    <div class="h-8 w-full skeleton rounded-xl mt-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div id="payment-section" class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50">
+                <h2 class="font-black text-blue-900 mb-6 uppercase text-xs tracking-widest flex items-center gap-2">
+                    <i class="fas fa-wallet opacity-40"></i> 2. M-Pesa Payment
+                </h2>
+                <div class="space-y-4">
+                    <div class="relative group">
+                        <span class="absolute left-5 top-1/2 -translate-y-1/2 font-black text-slate-300 transition-colors group-focus-within:text-blue-500">+254</span>
+                        <input type="tel" id="phone" placeholder="712345678" 
+                               class="w-full pl-16 pr-6 py-5 border border-slate-100 rounded-2xl text-left font-bold text-lg focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none transition-all bg-slate-50">
+                    </div>
+                    <button onclick="initiatePayHeroSTK()" id="payBtn" class="w-full btn-primary text-white py-5 rounded-2xl font-black text-sm shadow-lg shadow-blue-200 uppercase tracking-widest flex items-center justify-center gap-3">
+                        Request PIN <i class="fas fa-arrow-right text-[10px]"></i>
+                    </button>
+
+                    <div id="emergency-notice" class="mt-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-xl">
+                        <p class="text-[10px] font-bold text-yellow-800 uppercase tracking-tight">
+                            <i class="fas fa-exclamation-triangle mr-1"></i> STK Delayed?
+                        </p>
+                        <p class="text-[11px] text-yellow-700 leading-tight mt-1">
+                            If the prompt doesn't appear, pay manually to <b>Till: 7600516</b> then:
+                        </p>
+                        <a href="https://wa.me/254712153539?text=Hi, I have paid manually to Till 7600516. Please send my Wi-Fi code." 
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="mt-3 w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-md">
+                            <i class="fab fa-whatsapp text-lg"></i> WhatsApp Admin for Code
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50">
+                <div class="flex border-b border-slate-100 mb-6">
+                    <div id="tab-voucher" onclick="switchReconnectTab('voucher')" class="reconnect-tab active flex-1 text-center">Use Voucher</div>
+                    <div id="tab-mpesa" onclick="switchReconnectTab('mpesa')" class="reconnect-tab flex-1 text-center">Claim M-Pesa</div>
+                </div>
+
+                <div id="view-voucher" class="flex flex-col gap-4">
+                    <input type="text" id="accessCode" placeholder="ENTER CODE" 
+                           class="w-full p-5 rounded-2xl border border-slate-100 text-center font-mono text-xl font-black uppercase tracking-[0.4em] outline-none focus:ring-4 focus:ring-slate-50 focus:border-blue-500 bg-slate-50">
+                    <button onclick="connectToWifi()" id="connectBtn" class="bg-slate-900 hover:bg-black text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest transition-all">
+                        Connect Device
+                    </button>
+                </div>
+
+                <div id="view-mpesa" class="hidden flex flex-col gap-4">
+                    <input type="text" id="mpesaRef" placeholder="e.g. RJK1234567" 
+                           class="w-full p-5 rounded-2xl border border-slate-100 text-center font-mono text-lg font-black uppercase tracking-widest outline-none focus:ring-4 focus:ring-slate-50 focus:border-blue-500 bg-slate-50">
+                    <button onclick="claimByMpesa()" id="claimBtn" class="bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest transition-all">
+                        Verify Payment
+                    </button>
+                    <p class="text-[9px] text-slate-400 text-center uppercase font-bold leading-tight">Enter the 10-digit M-Pesa code from your SMS to retrieve your voucher.</p>
+                </div>
+            </div>
+        </div>
+
+        <p id="statusMsg" class="text-center mt-12 text-[10px] font-black min-h-[20px] uppercase tracking-[0.2em]"></p>
+    </div>
+
+    <footer class="mt-auto py-8 border-t border-blue-50 bg-white">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <p class="text-slate-400 text-sm font-medium">
+                &copy; 2026 WIFI INTERNET. All Rights Reserved.
+            </p>
+            <p class="mt-2 text-slate-500 text-xs tracking-wide uppercase">
+                Developed by 
+                <a href="https://mrsnookum.github.io/Brighton-Portfolio/" 
+                   target="_blank" 
+                   rel="noopener noreferrer" 
+                   class="font-bold text-blue-600 hover:text-blue-800 transition-colors duration-200">
+                    Brighton the Dev
+                </a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzNWG5QOqG72Hroid3BZ3yQGSp4lVw-yhYlXwy5P_B7vDvFUlTUFZchQc6rh84hwrU/exec';
+        let selectedPackage = null;
+        let tenantId = null;
+
+        // Listen for live preview changes from Admin Dashboard
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'updateBranding') {
+                if (event.data.title) {
+                    const header = document.getElementById('ispNameHeader');
+                    if(header) header.innerText = event.data.title;
+                }
+                if (event.data.color) {
+                    const btns = document.querySelectorAll('.btn-primary');
+                    btns.forEach(btn => {
+                        btn.style.background = `linear-gradient(135deg, ${event.data.color} 0%, ${event.data.color}dd 100%)`;
+                    });
+                    
+                    let styleEl = document.getElementById('dynamic-branding');
+                    if (!styleEl) {
+                        styleEl = document.createElement('style');
+                        styleEl.id = 'dynamic-branding';
+                        document.head.appendChild(styleEl);
+                    }
+                    styleEl.innerHTML = `
+                        .package-card.selected { border-color: ${event.data.color} !important; background-color: ${event.data.color}11 !important; }
+                        .package-card.selected .select-btn { background-color: ${event.data.color} !important; color: white !important; }
+                        .spinner-ring { border-top-color: ${event.data.color} !important; border-color: ${event.data.color}22; }
+                    `;
+                }
+            }
+        });
+
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            tenantId = params.get('tenant');
+            if (!tenantId) {
+                updateStatus("System Error: No Tenant ID provided in URL.", "red");
+            }
+        }
+
+        function setOverlay(show, title = "", msg = "") {
+            const overlay = document.getElementById('processingOverlay');
+            if(show) {
+                document.getElementById('overlayTitle').innerText = title;
+                document.getElementById('overlayMsg').innerText = msg;
+                overlay.classList.remove('hidden');
+            } else { overlay.classList.add('hidden'); }
+        }
+
+        function switchReconnectTab(tab) {
+            const vTab = document.getElementById('tab-voucher');
+            const mTab = document.getElementById('tab-mpesa');
+            const vView = document.getElementById('view-voucher');
+            const mView = document.getElementById('view-mpesa');
+
+            if(tab === 'voucher') {
+                vTab.classList.add('active'); mTab.classList.remove('active');
+                vView.classList.remove('hidden'); mView.classList.add('hidden');
+            } else {
+                mTab.classList.add('active'); vTab.classList.remove('active');
+                mView.classList.remove('hidden'); vView.classList.add('hidden');
+            }
+        }
+
+        async function fetchPackages() {
+            getUrlParams();
+            if (!tenantId) return;
+
+            try {
+                const response = await fetch(`${APPS_SCRIPT_URL}?action=getPortalData&tenant=${tenantId}`);
+                const result = await response.json();
+                
+                if (result.status === "success") {
+                    if(result.ispName) {
+                        document.getElementById('ispNameHeader').innerText = result.ispName;
+                        document.title = "Wi-Fi Portal - " + result.ispName;
+                    }
+                    
+                    // If custom colors were saved
+                    if (result.color) {
+                        window.postMessage({ type: 'updateBranding', color: result.color }, '*');
+                    }
+
+                    if(result.packages && result.packages.length > 0) {
+                        renderPackages(result.packages);
+                    } else {
+                        document.getElementById('package-container').innerHTML = '<div class="col-span-full text-center text-red-500 font-bold p-4 bg-red-50 rounded-xl">No active packages available for this ISP.</div>';
+                    }
+                } else { throw new Error(result.message || "Failed to load packages"); }
+            } catch (e) {
+                console.warn("Fetch failed, using defaults", e);
+                renderPackages([{name: "1 Hour Access", price: 10}, {name: "1 Day Access", price: 50}]);
+                updateStatus("Using offline fallback packages.", "orange");
+            }
+        }
+
+        function renderPackages(pkgs) {
+            const container = document.getElementById('package-container');
+            container.innerHTML = pkgs.map((pkg, index) => {
+                const pkgName = pkg.name || pkg[0] || 'Unknown';
+                const pkgPrice = pkg.price || pkg[1] || '0';
+                const pkgId = `pkg-${index}`;
+                return `
+                <div id="${pkgId}" 
+                     class="package-card p-6 text-center shadow-sm" 
+                     onclick="selectPkg('${pkgName}', ${pkgPrice}, '${pkgId}')">
+                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">${pkgName}</h3>
+                    <p class="text-2xl font-black text-slate-900">KES ${pkgPrice}</p>
+                    <div class="mt-4 py-2 px-3 rounded-xl bg-slate-50 text-[8px] font-black text-blue-600 uppercase tracking-widest transition-colors select-btn">Select</div>
+                </div>`;
+            }).join('');
+        }
+
+        function selectPkg(name, price, id) {
+            selectedPackage = { name, price };
+            document.querySelectorAll('.package-card').forEach(c => {
+                c.classList.remove('selected');
+                c.querySelector('.select-btn').classList.replace('bg-blue-600', 'bg-slate-50');
+                c.querySelector('.select-btn').classList.replace('text-white', 'text-blue-600');
+            });
+            const card = document.getElementById(id);
+            if(card) {
+                card.classList.add('selected');
+                card.querySelector('.select-btn').classList.replace('bg-slate-50', 'bg-blue-600');
+                card.querySelector('.select-btn').classList.replace('text-blue-600', 'text-white');
+            }
+            
+            updateStatus(`Plan: ${name} selected`, "blue");
+            document.getElementById('payment-section').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => { document.getElementById('phone').focus(); }, 600);
+        }
+
+        async function initiatePayHeroSTK() {
+            const phoneInput = document.getElementById('phone').value.trim();
+            if (!tenantId) return updateStatus("System Error: No Tenant ID", "red");
+            if (!selectedPackage) return updateStatus("Please select a plan first", "red");
+            if (!phoneInput || phoneInput.length < 9) return updateStatus("Invalid phone number", "red");
+
+            setOverlay(true, "Requesting PIN", "Check your phone for the M-Pesa prompt.");
+
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ 
+                        action: "registerPayment", 
+                        tenant: tenantId,
+                        phone: phoneInput, 
+                        package: selectedPackage.name 
+                    })
+                });
+                const result = await response.json();
+                
+                if(result.status === "success" || result.success === true) {
+                    updateStatus("STK Sent. Waiting for payment confirmation...", "green");
+                    pollForCode(phoneInput);
+                } else { 
+                    setOverlay(false); 
+                    updateStatus(result.message || "STK Trigger Failed. Check account status.", "red"); 
+                }
+            } catch (e) { 
+                setOverlay(false); 
+                updateStatus("Network Error. Ensure your connection is active.", "red"); 
+            }
+        }
+
+        async function pollForCode(phone) {
+            const cleanPhone = phone.toString().slice(-9); 
+            const interval = setInterval(async () => {
+                try {
+                    const response = await fetch(`${APPS_SCRIPT_URL}?action=checkMyCode&tenant=${tenantId}&phone=${cleanPhone}`);
+                    const result = await response.json();
+                    if (result.status === "success") {
+                        clearInterval(interval);
+                        switchReconnectTab('voucher');
+                        document.getElementById('accessCode').value = result.code;
+                        setOverlay(true, "Payment Confirmed!", "Your high-speed session is starting...");
+                        setTimeout(() => connectToWifi(), 1000); 
+                    }
+                } catch (e) {}
+            }, 4000); 
+            
+            // Clear interval after 2 minutes to prevent infinite polling
+            setTimeout(() => {
+                clearInterval(interval);
+                if(document.getElementById('processingOverlay').classList.contains('hidden') === false) {
+                     setOverlay(false);
+                     updateStatus("Payment verification timeout. If you paid, try 'Claim M-Pesa'.", "orange");
+                }
+            }, 120000);
+        }
+
+        async function claimByMpesa() {
+            const ref = document.getElementById('mpesaRef').value.trim().toUpperCase();
+            if(!tenantId) return updateStatus("System Error: No Tenant ID", "red");
+            if(!ref || ref.length < 5) return updateStatus("Enter a valid M-Pesa Reference", "red");
+
+            setOverlay(true, "Verifying Reference", "Searching for your payment...");
+            try {
+                const response = await fetch(`${APPS_SCRIPT_URL}?action=claimPayment&tenant=${tenantId}&ref=${ref}`);
+                const result = await response.json();
+                setOverlay(false);
+                
+                if(result.status === "success") {
+                    switchReconnectTab('voucher');
+                    document.getElementById('accessCode').value = result.code;
+                    updateStatus("Voucher Found!", "green");
+                } else {
+                    updateStatus(result.message || "Reference not found yet.", "red");
+                }
+            } catch (e) {
+                setOverlay(false);
+                updateStatus("System error. Try again.", "red");
+            }
+        }
+
+        async function connectToWifi() {
+            const codeInput = document.getElementById('accessCode').value.trim().toUpperCase();
+            if (!codeInput) return updateStatus("Enter your code", "red");
+            
+            const params = new URLSearchParams(window.location.search);
+            const loginUrl = params.get('login_url');
+            
+            if (loginUrl) {
+                setOverlay(true, "Connecting", "Logging you in securely...");
+                // MikroTik expects standard form submission or URL parameters
+                window.location.href = `${loginUrl}?username=${codeInput}&password=${codeInput}`;
+            } else {
+                updateStatus("Not connected to MikroTik network.", "red");
+            }
+        }
+
+        function updateStatus(msg, color) {
+            const status = document.getElementById('statusMsg');
+            status.innerHTML = msg;
+            status.style.color = color === "red" ? "#f43f5e" : (color === "green" ? "#10b981" : (color === "orange" ? "#f59e0b" : "#3b82f6"));
+        }
+
+        // Init
+        fetchPackages();
+    </script>
+</body>
+</html>
