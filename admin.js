@@ -104,6 +104,12 @@ function processFetchedData(data) {
     renderBindingsTable(bindingsData); 
     
     applyDashboardFilter();
+    
+    // 💰 NEW: Handle Veltrix SaaS Billing UI
+    renderSaaSBilling(data.billingDate, data.veltrixFee);
+    
+    // 📢 NEW: Handle Broadcasts UI
+    renderSaaSBroadcasts(data.broadcasts);
 
     // Populate Customization Form
     if (document.getElementById('setPortalTitle')) {
@@ -122,6 +128,63 @@ function processFetchedData(data) {
     }
 }
 
+// --- 💰 NEW: SAAS BILLING LOGIC ---
+function renderSaaSBilling(billingDateStr, fee) {
+    const card = document.getElementById('billingCard');
+    if(!card) return;
+    
+    document.getElementById('veltrixFeeDisplay').innerText = (fee || 1300).toLocaleString();
+    
+    const dateEl = document.getElementById('billingDueDate');
+    if(!billingDateStr || billingDateStr === "Not Set") {
+        dateEl.innerText = "Setup Required"; 
+        return;
+    }
+    
+    dateEl.innerText = billingDateStr;
+    const dueDate = new Date(billingDateStr);
+    const today = new Date();
+    
+    // If Overdue
+    if (today > dueDate) {
+        card.classList.replace('border-blue-500', 'border-red-500');
+        const iconContainer = card.querySelector('.bg-blue-100');
+        if(iconContainer) {
+            iconContainer.classList.replace('bg-blue-100', 'bg-red-100');
+            iconContainer.classList.replace('text-blue-600', 'text-red-600');
+        }
+        const amountText = document.getElementById('billingAmount');
+        if(amountText) amountText.classList.replace('text-slate-800', 'text-red-600');
+        dateEl.classList.replace('text-slate-700', 'text-red-600');
+        dateEl.innerText = billingDateStr + " (OVERDUE)";
+    }
+}
+
+// --- 📢 NEW: SAAS BROADCAST LOGIC ---
+function renderSaaSBroadcasts(broadcasts) {
+    const container = document.getElementById('broadcastsContainer');
+    const badge = document.getElementById('notificationBadge');
+    
+    if(!container || !badge) return;
+    
+    if(!broadcasts || broadcasts.length === 0) {
+        container.innerHTML = `<div class="p-8 text-center text-slate-400 text-sm"><i class="fas fa-check-circle text-emerald-400 text-2xl mb-2 block"></i>All systems operational. No alerts.</div>`;
+        badge.classList.add('hidden');
+        return;
+    }
+    
+    badge.classList.remove('hidden'); // Show red dot
+    
+    container.innerHTML = broadcasts.map(b => `
+        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm relative overflow-hidden">
+            <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
+            <p class="text-[9px] text-slate-400 font-mono mb-2"><i class="fas fa-clock mr-1"></i> ${b.timestamp}</p>
+            <p class="text-sm text-slate-700 leading-relaxed font-medium">${b.message}</p>
+        </div>
+    `).join('');
+}
+
+
 function applyDashboardFilter() {
     const filterVal = document.getElementById('dashboardTimeFilter').value;
     let filteredTxns = allUsersData;
@@ -138,8 +201,8 @@ function applyDashboardFilter() {
     }
 
     const totalRev = filteredTxns.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
-    document.getElementById('totalSales').innerText = `KES ${totalRev}`;
-    document.getElementById('netProfit').innerText = `KES ${totalRev}`;
+    document.getElementById('totalSales').innerText = `KES ${totalRev.toLocaleString()}`;
+    document.getElementById('netProfit').innerText = `KES ${totalRev.toLocaleString()}`;
     document.getElementById('totalCount').innerText = filteredTxns.length;
 
     updateChartAndFeed(filteredTxns);
@@ -242,7 +305,7 @@ function updateChartAndFeed(transactions) {
             const recent = [...transactions].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 15);
             feed.innerHTML = recent.map(t => {
                 const timeStr = t.timestamp ? new Date(t.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now';
-                const amountStr = t.amount ? `<span class="text-green-500 font-black text-[10px]">+KES ${t.amount}</span>` : '';
+                const amountStr = t.amount ? `<span class="text-emerald-500 font-black text-[10px]">+KES ${t.amount}</span>` : '';
                 
                 return `
                 <div class="flex items-center gap-3 border-b border-slate-50 pb-3 mb-3 last:border-0 last:mb-0 last:pb-0 hover:bg-slate-50 p-2 rounded-lg transition">
@@ -307,9 +370,9 @@ function renderExpiryTable(dataArray) {
         }
 
         let statusBadge = '';
-        if (t.status === 'Active') statusBadge = `<span class="bg-green-100 text-green-700 font-bold px-2.5 py-1 rounded-md text-[10px] uppercase tracking-wide">Active</span>`;
-        else if (t.status === 'Expired') statusBadge = `<span class="bg-red-50 text-red-600 font-bold px-2.5 py-1 rounded-md text-[10px] uppercase tracking-wide">Expired</span>`;
-        else statusBadge = `<span class="bg-slate-100 text-slate-600 font-bold px-2.5 py-1 rounded-md text-[10px] uppercase tracking-wide">${t.status || 'Pending'}</span>`;
+        if (t.status === 'Active') statusBadge = `<span class="bg-green-100 text-green-700 font-bold px-2.5 py-1 rounded-md text-[10px] uppercase tracking-wide border border-green-200">Active</span>`;
+        else if (t.status === 'Expired') statusBadge = `<span class="bg-red-50 text-red-600 font-bold px-2.5 py-1 rounded-md text-[10px] uppercase tracking-wide border border-red-200">Expired</span>`;
+        else statusBadge = `<span class="bg-slate-100 text-slate-600 font-bold px-2.5 py-1 rounded-md text-[10px] uppercase tracking-wide border border-slate-200">${t.status || 'Pending'}</span>`;
 
         return `
         <tr class="hover:bg-slate-50 transition border-b border-slate-50">
@@ -430,7 +493,7 @@ function renderUserTable(dataArray) {
         else statusBadge = `<span class="bg-slate-100 text-slate-600 border border-slate-200 font-bold px-2.5 py-1 rounded-md text-[10px] uppercase tracking-wide">${t.status || 'Pending'}</span>`;
 
         return `
-        <tr class="hover:bg-slate-50 transition group">
+        <tr class="hover:bg-slate-50 transition group border-b border-slate-50">
             <td class="py-3 px-4">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-full ${avatarColor} flex items-center justify-center font-black text-[10px] shrink-0 shadow-sm">${initial}</div>
@@ -442,7 +505,7 @@ function renderUserTable(dataArray) {
             </td>
             <td class="py-3 px-4">
                 <p class="text-sm font-bold text-slate-700">${t.package || 'Data Plan'}</p>
-                <p class="text-[10px] font-bold text-slate-400 uppercase mt-0.5">${t.type || 'Hotspot'}</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase mt-0.5 tracking-widest">${t.type || 'Hotspot'}</p>
             </td>
             <td class="py-3 px-4">
                 <p class="text-[10px] font-bold text-slate-500 uppercase truncate max-w-[120px]">${networkMain}</p>
@@ -466,7 +529,7 @@ function renderTransactionsTable(dataArray) {
     
     const sorted = [...dataArray].reverse(); 
     tbody.innerHTML = sorted.map(t => {
-        const dateStr = t.timestamp ? new Date(t.timestamp).toLocaleString() : 'N/A';
+        const dateStr = t.timestamp ? new Date(t.timestamp).toLocaleString('en-US', {month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'}) : 'N/A';
         const refStr = t.ref || t.code || 'N/A';
         const amountStr = t.amount ? `KES ${t.amount}` : '-';
         
@@ -476,7 +539,7 @@ function renderTransactionsTable(dataArray) {
             <td class="py-4 px-4 text-sm font-bold text-slate-900 tracking-wider">${refStr}</td>
             <td class="py-4 px-4 text-sm font-bold text-slate-700">${t.phone || '-'}</td>
             <td class="py-4 px-4 text-sm font-bold text-slate-700">${t.package || '-'}</td>
-            <td class="py-4 px-4 text-sm font-black text-green-600 text-right">${amountStr}</td>
+            <td class="py-4 px-4 text-sm font-black text-emerald-600 text-right">${amountStr}</td>
         </tr>`;
     }).join('');
 }
@@ -667,17 +730,23 @@ function hideBindingModal() { document.getElementById('bindingModal').classList.
 function closeSuccessModal() { document.getElementById('successModal').classList.add('hidden'); }
 function showPackageModal() { document.getElementById('pkgModal').classList.remove('hidden'); }
 function hidePackageModal() { document.getElementById('pkgModal').classList.add('hidden'); }
-function toggleNotifications(e) { e.stopPropagation(); document.getElementById('notificationDropdown').classList.toggle('hidden'); }
-function closeDropdowns() { document.getElementById('notificationDropdown').classList.add('hidden'); }
+function toggleNotifications(e) { 
+    e.stopPropagation(); 
+    document.getElementById('notificationsPanel').classList.remove('translate-x-full');
+    document.getElementById('notificationBadge').classList.add('hidden');
+}
+function clearAlerts() { document.getElementById('broadcastsContainer').innerHTML = '<div class="p-8 text-center text-slate-400 text-sm"><i class="fas fa-check-circle text-emerald-400 text-2xl mb-2 block"></i>All alerts cleared.</div>'; }
+function closeDropdowns() { document.getElementById('notificationsPanel').classList.add('translate-x-full'); }
 
 window.onload = () => { 
-    // Set up portal preview dynamically inside iframe load to prevent missing tenant
     document.addEventListener('DOMContentLoaded', () => {
         const iframe = document.getElementById('portalPreviewIframe');
         if (iframe && TENANT_ID) iframe.src = `portal.html?tenant=${TENANT_ID}`;
     });
 
-    if (localStorage.getItem('veltrix_temp_pass')) checkLogin(); 
+    if (localStorage.getItem('veltrix_temp_pass') || window.location.search.includes('autoAuth=true')) {
+        checkLogin();
+    }
 };
 
 // --- MikroTik Tab & Setup Guide Functions --- //
@@ -831,7 +900,6 @@ function updatePortalPreview() {
     const title = document.getElementById('setPortalTitle').value || 'Wi-Fi Portal';
     const color = document.getElementById('setPortalColor').value || '#2563eb';
     
-    // We send a message to the iframe to update its styles dynamically
     iframe.contentWindow.postMessage({
         type: 'updateBranding',
         title: title,
@@ -860,3 +928,59 @@ async function savePortalSettings() {
         }
     } catch (e) { showStatus("Server Error", "bg-red-600"); }
 }
+
+// --- 💳 SAAS PAYMENT MODAL LOGIC (HYBRID) ---
+document.getElementById('openPaySaaSBtn')?.addEventListener('click', () => {
+    document.getElementById('saasPaymentModal').classList.remove('hidden');
+});
+document.getElementById('closeSaaSModal')?.addEventListener('click', () => {
+    document.getElementById('saasPaymentModal').classList.add('hidden');
+});
+
+document.getElementById('tabBtnAuto')?.addEventListener('click', function() {
+    document.getElementById('saasTabAuto').classList.remove('hidden');
+    document.getElementById('saasTabManual').classList.add('hidden');
+    this.className = "flex-1 py-4 text-blue-600 border-b-2 border-blue-600 bg-white transition";
+    document.getElementById('tabBtnManual').className = "flex-1 py-4 text-slate-400 border-b-2 border-transparent hover:text-slate-600 transition";
+});
+
+document.getElementById('tabBtnManual')?.addEventListener('click', function() {
+    document.getElementById('saasTabManual').classList.remove('hidden');
+    document.getElementById('saasTabAuto').classList.add('hidden');
+    this.className = "flex-1 py-4 text-purple-600 border-b-2 border-purple-600 bg-white transition";
+    document.getElementById('tabBtnAuto').className = "flex-1 py-4 text-slate-400 border-b-2 border-transparent hover:text-slate-600 transition";
+});
+
+// Submit Auto (STK)
+document.getElementById('submitSaaSAutoBtn')?.addEventListener('click', async function() {
+    const phone = document.getElementById('saasPhoneInput').value;
+    if(!phone) return showStatus("Enter a valid phone number", "bg-red-500");
+    
+    const originalText = this.innerText;
+    this.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Initiating...`; this.disabled = true;
+    
+    try {
+        const res = await fetch(APPS_SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "payVeltrixAuto", tenant: TENANT_ID, phone: phone }) });
+        const result = await res.json();
+        if(result.status === "success") { showStatus(result.message, "bg-emerald-600"); setTimeout(() => document.getElementById('saasPaymentModal').classList.add('hidden'), 3000); } 
+        else { showStatus(result.message, "bg-red-500"); }
+    } catch(e) { showStatus("Network Error", "bg-red-600"); } 
+    finally { this.innerHTML = originalText; this.disabled = false; }
+});
+
+// Submit Manual
+document.getElementById('submitSaaSManualBtn')?.addEventListener('click', async function() {
+    const msg = document.getElementById('saasManualMsg').value;
+    if(!msg || msg.length < 15) return showStatus("Paste the full M-Pesa message", "bg-red-500");
+    
+    const originalText = this.innerText;
+    this.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Submitting...`; this.disabled = true;
+    
+    try {
+        const res = await fetch(APPS_SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "payVeltrixManual", tenant: TENANT_ID, message: msg }) });
+        const result = await res.json();
+        if(result.status === "success") { showStatus(result.message, "bg-emerald-600"); document.getElementById('saasManualMsg').value = ''; setTimeout(() => document.getElementById('saasPaymentModal').classList.add('hidden'), 3000); } 
+        else { showStatus(result.message, "bg-red-500"); }
+    } catch(e) { showStatus("Network Error", "bg-red-600"); } 
+    finally { this.innerHTML = originalText; this.disabled = false; }
+});
