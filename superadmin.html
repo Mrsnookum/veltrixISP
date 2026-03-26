@@ -73,6 +73,10 @@
                 </div>
             </div>
             <div class="flex items-center gap-4">
+                <button id="openBroadcastBtn" class="hidden md:flex items-center gap-2 bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-full text-xs font-bold shadow-[0_0_15px_rgba(168,85,247,0.4)] transition">
+                    <i class="fas fa-bullhorn"></i> Broadcast
+                </button>
+
                 <button id="addTenantBtn" class="hidden md:flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-full text-xs font-bold shadow-[0_0_15px_rgba(37,99,235,0.4)] transition">
                     <i class="fas fa-plus"></i> Add ISP
                 </button>
@@ -107,11 +111,16 @@
                         <h3 id="statSuspended" class="text-4xl font-black text-red-400 relative z-10">0</h3>
                     </div>
 
-                    <div class="glass-card p-6 rounded-3xl relative overflow-hidden group">
+                    <div class="glass-card p-6 rounded-3xl relative overflow-hidden group border-b-4 border-b-purple-500">
                         <div class="absolute -right-6 -top-6 text-purple-900/20 group-hover:scale-110 transition-transform"><i class="fas fa-chart-line text-8xl"></i></div>
-                        <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1 relative z-10">Est. MRR (Veltrix)</p>
-                        <h3 id="statMRR" class="text-4xl font-black text-purple-400 relative z-10">$0</h3>
-                        <p class="text-[9px] text-slate-500 mt-1 relative z-10">Based on active tenants</p>
+                        <div class="flex justify-between items-start relative z-10">
+                            <div>
+                                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Platform GMV (KES)</p>
+                                <h3 id="statGMV" class="text-3xl font-black text-purple-400">---</h3>
+                                <p class="text-[9px] text-slate-500 mt-1">Total revenue across all ISPs</p>
+                            </div>
+                            <button id="calcGMVBtn" class="text-purple-400 hover:text-white bg-purple-500/20 hover:bg-purple-500 p-2 rounded-lg transition"><i id="calcGMVIcon" class="fas fa-calculator"></i></button>
+                        </div>
                     </div>
                 </div>
 
@@ -228,6 +237,18 @@
                 <button id="closeBillingModalBtn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl transition text-sm">Cancel</button>
                 <button id="submitBillingBtn" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-black py-3 rounded-xl transition text-sm shadow-[0_0_15px_rgba(168,85,247,0.4)]">Update Date</button>
             </div>
+        </div>
+    </div>
+
+    <div id="broadcastModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[200] hidden flex items-center justify-center p-4">
+        <div class="glass-card p-8 rounded-3xl max-w-lg w-full border border-slate-600 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-black text-white"><i class="fas fa-bullhorn text-purple-400 mr-2"></i> Global Broadcast</h3>
+                <button id="closeBroadcastBtn" class="text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <p class="text-xs text-slate-400 mb-4">This message will appear as an alert banner in ALL active ISP admin dashboards instantly.</p>
+            <textarea id="broadcastMessage" rows="4" placeholder="Enter your announcement here..." class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl px-4 py-3 mb-6 focus:border-purple-500 focus:outline-none resize-none font-medium text-sm"></textarea>
+            <button id="submitBroadcastBtn" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-black py-3 rounded-xl transition text-sm uppercase tracking-widest shadow-[0_0_15px_rgba(168,85,247,0.4)]">Transmit to All Nodes</button>
         </div>
     </div>
 
